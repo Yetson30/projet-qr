@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+  <!-- Cameroun : 3 bandes verticales égales Vert / Rouge / Jaune + étoile jaune au centre -->
+  <rect width="300" height="600" fill="#007A5E"/>
+  <rect x="300" width="300" height="600" fill="#CE1126"/>
+  <rect x="600" width="300" height="600" fill="#FCD116"/>
+  <!-- Étoile jaune à 5 branches au centre du rouge -->
+  <polygon points="450,210 463,252 507,252 472,277 485,320 450,295 415,320 428,277 393,252 437,252" fill="#FCD116"/>
+</svg>

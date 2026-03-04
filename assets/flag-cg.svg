@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+  <!--
+    Drapeau Congo : diagonale de BAS-GAUCHE (0,600) vers HAUT-DROIT (900,0)
+    Bande jaune centrale, environ 1/6 de la hauteur de chaque côté de la diagonale.
+    Offset perpendiculaire ~100px → projection : dx=60, dy=90 (approximatif propre)
+  -->
+
+  <!-- VERT : triangle haut-gauche -->
+  <polygon points="0,0  900,0  0,600" fill="#009A44"/>
+
+  <!-- ROUGE : triangle bas-droit -->
+  <polygon points="900,0  900,600  0,600" fill="#DC241F"/>
+
+  <!-- JAUNE : bande diagonale du bas-gauche vers haut-droit -->
+  <!-- Ligne supérieure de la bande : décalée vers haut-gauche -->
+  <!-- Ligne inférieure de la bande : décalée vers bas-droit -->
+  <!-- perpendiculaire à (900,-600): direction normalisée (600,900)/1082 -->
+  <!-- offset 90px perpendiculaire → (50, 75) sur les axes -->
+  <polygon points="0,525  750,0  900,0  900,75  150,600  0,600" fill="#F7E017"/>
+
+</svg>

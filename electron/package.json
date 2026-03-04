@@ -1,0 +1,109 @@
+{
+  "name": "qr-poster-studio",
+  "version": "1.0.0",
+  "description": "QR Poster Studio — Générateur de posters marchands Moov Money / GIMACPAY",
+  "main": "main.js",
+  "author": {
+    "name": "Moov Money Gabon",
+    "email": "contact@moovmoney.ga"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+
+  "scripts": {
+    "start":        "electron .",
+    "dev":          "electron . --inspect",
+    "build:win":    "electron-builder --win --x64",
+    "build:win32":  "electron-builder --win --ia32",
+    "build:all":    "electron-builder --win --x64 --ia32",
+    "pack":         "electron-builder --dir",
+    "postinstall":  "electron-builder install-app-deps"
+  },
+
+  "dependencies": {},
+
+  "devDependencies": {
+    "electron":         "^29.1.0",
+    "electron-builder": "^24.13.3"
+  },
+
+  "build": {
+    "appId":       "ga.moovmoney.qrposterstudio",
+    "productName": "QR Poster Studio",
+    "copyright":   "© 2026 Moov Money Gabon",
+
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+
+    "files": [
+      "main.js",
+      "preload.js",
+      "../index.html",
+      "../template-preview.html",
+      "../assets/**/*",
+      "../css/**/*",
+      "../js/**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,readme.md}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}"
+    ],
+
+    "extraResources": [
+      {
+        "from": "../assets",
+        "to":   "assets",
+        "filter": ["**/*"]
+      }
+    ],
+
+    "win": {
+      "target": [
+        { "target": "nsis",     "arch": ["x64", "ia32"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon":              "build/icon.ico",
+      "requestedExecutionLevel": "asInvoker",
+      "publisherName":     "Moov Money Gabon",
+      "legalTrademarks":   "Moov Money Gabon © 2026",
+      "fileAssociations": [
+        {
+          "ext":  "pdf",
+          "name": "QR Poster Studio PDF",
+          "role": "Viewer"
+        }
+      ]
+    },
+
+    "nsis": {
+      "oneClick":              false,
+      "perMachine":            false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation":        true,
+      "installerIcon":         "build/icon.ico",
+      "uninstallerIcon":       "build/icon.ico",
+      "installerHeaderIcon":   "build/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName":          "QR Poster Studio",
+      "menuCategory":          "Moov Money Gabon",
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages":    ["French", "English"],
+      "language":              "1036",
+      "multiLanguageInstaller": true,
+      "displayLanguageSelector": false,
+      "license":               "build/license.txt"
+    },
+
+    "portable": {
+      "artifactName": "QR-Poster-Studio-Portable-${version}.exe"
+    },
+
+    "publish": null
+  }
+}

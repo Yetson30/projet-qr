@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+  <!-- Guinée Équatoriale : 3 bandes horizontales Vert / Blanc / Rouge + bande bleue triangulaire à gauche + armoiries au centre -->
+  <rect width="900" height="200" fill="#3E9A00"/>
+  <rect y="200" width="900" height="200" fill="#FFFFFF"/>
+  <rect y="400" width="900" height="200" fill="#E32118"/>
+  <!-- Triangle bleu gauche -->
+  <polygon points="0,0 280,300 0,600" fill="#0073CE"/>
+  <!-- Armoiries simplifiées : arbre silk cotton (fromager) centré dans la bande blanche -->
+  <!-- Bouclier bleu -->
+  <rect x="390" y="220" width="120" height="90" rx="10" ry="10" fill="#0073CE"/>
+  <!-- Arbre stylisé -->
+  <rect x="440" y="195" width="20" height="90" fill="#5D4037"/>
+  <ellipse cx="450" cy="195" rx="35" ry="28" fill="#2E7D32"/>
+  <!-- 6 étoiles jaunes en arc en haut -->
+  <circle cx="340" cy="80" r="14" fill="#FFD700"/>
+  <circle cx="396" cy="52" r="14" fill="#FFD700"/>
+  <circle cx="456" cy="44" r="14" fill="#FFD700"/>
+  <circle cx="516" cy="52" r="14" fill="#FFD700"/>
+  <circle cx="572" cy="80" r="14" fill="#FFD700"/>
+  <!-- Étoile centrale en dessous -->
+  <circle cx="456" cy="110" r="14" fill="#FFD700"/>
+</svg>

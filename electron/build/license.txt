@@ -1,0 +1,65 @@
+CONTRAT DE LICENCE UTILISATEUR FINAL (CLUF)
+QR Poster Studio — Moov Money Gabon
+Version 1.0.0 — Mars 2026
+═══════════════════════════════════════════════════════════════════════════════
+
+IMPORTANT : VEUILLEZ LIRE ATTENTIVEMENT CE CONTRAT AVANT D'INSTALLER OU
+D'UTILISER CE LOGICIEL.
+
+EN INSTALLANT, COPIANT OU UTILISANT CE LOGICIEL, VOUS ACCEPTEZ LES TERMES
+DE CE CONTRAT. SI VOUS N'ACCEPTEZ PAS CES TERMES, N'INSTALLEZ PAS CE LOGICIEL.
+
+───────────────────────────────────────────────────────────────────────────────
+1. PROPRIÉTÉ DU LOGICIEL
+───────────────────────────────────────────────────────────────────────────────
+QR Poster Studio (ci-après "le Logiciel") est la propriété exclusive de
+Moov Money Gabon (ci-après "l'Éditeur"). Tous droits réservés.
+© 2026 Moov Money Gabon — Libreville, Gabon
+
+───────────────────────────────────────────────────────────────────────────────
+2. LICENCE D'UTILISATION
+───────────────────────────────────────────────────────────────────────────────
+L'Éditeur vous accorde une licence non exclusive, non transférable et
+révocable pour utiliser ce Logiciel uniquement à des fins professionnelles
+internes à Moov Money Gabon et à ses partenaires autorisés.
+
+───────────────────────────────────────────────────────────────────────────────
+3. RESTRICTIONS
+───────────────────────────────────────────────────────────────────────────────
+Il vous est interdit de :
+  a) Copier, modifier ou distribuer ce Logiciel sans autorisation écrite.
+  b) Décompiler, désassembler ou tenter d'extraire le code source.
+  c) Utiliser ce Logiciel à des fins commerciales non autorisées.
+  d) Supprimer ou modifier les mentions de propriété intellectuelle.
+
+───────────────────────────────────────────────────────────────────────────────
+4. DONNÉES ET CONFIDENTIALITÉ
+───────────────────────────────────────────────────────────────────────────────
+Ce Logiciel fonctionne entièrement hors ligne (offline). Aucune donnée
+personnelle n'est transmise à des serveurs externes. Les données des
+marchands sont stockées localement sur votre poste de travail.
+
+───────────────────────────────────────────────────────────────────────────────
+5. LIMITATION DE RESPONSABILITÉ
+───────────────────────────────────────────────────────────────────────────────
+Ce Logiciel est fourni "tel quel". L'Éditeur ne garantit pas qu'il sera
+exempt d'erreurs ou qu'il fonctionnera de manière ininterrompue. En aucun
+cas l'Éditeur ne sera responsable des dommages directs ou indirects résultant
+de l'utilisation ou de l'impossibilité d'utiliser ce Logiciel.
+
+───────────────────────────────────────────────────────────────────────────────
+6. RÉSILIATION
+───────────────────────────────────────────────────────────────────────────────
+Cette licence est valable jusqu'à résiliation. Elle prend fin automatiquement
+si vous ne respectez pas ses termes. À la résiliation, vous devez détruire
+toutes les copies du Logiciel en votre possession.
+
+───────────────────────────────────────────────────────────────────────────────
+7. DROIT APPLICABLE
+───────────────────────────────────────────────────────────────────────────────
+Ce contrat est régi par le droit gabonais. Tout litige sera soumis à la
+juridiction exclusive des tribunaux de Libreville, Gabon.
+
+───────────────────────────────────────────────────────────────────────────────
+EN CLIQUANT SUR "J'ACCEPTE", VOUS CONFIRMEZ AVOIR LU ET ACCEPTÉ CES TERMES.
+───────────────────────────────────────────────────────────────────────────────

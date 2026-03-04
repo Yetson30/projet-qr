@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR Poster Studio — Moov Money Gabon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<!-- interact.js pour le drag‑n‑drop des éléments, chargé en non‑bloquant -->
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" defer></script>
+<!-- pdf.js sera chargé à la demande (import PDF) pour éviter le blocage -->
+<style>
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --or:#EC6608; --bl:#005CA9; --wh:#fff; --bk:#0d0d0d;
+  --sb:#16213e; --dk:#0f172a; --brd:#2a3a5e; --tx:#cbd5e1; --tx2:#94a3b8;
+}
+body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ═══════════════════════════════════════
+   HEADER
+═══════════════════════════════════════ */
+.hdr{background:linear-gradient(135deg,#EC6608,#c95405);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:100;}
+.hbrand{display:flex;align-items:center;gap:10px;}
+.hbrand h1{color:#fff;font-size:16px;font-weight:700;}
+.hbrand span{color:rgba(255,255,255,.7);font-size:10px;display:block;}
+.hactions{display:flex;gap:6px;align-items:center;}
+.btn{padding:6px 13px;border-radius:7px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.bwh{background:#fff;color:var(--or);}.bwh:hover{background:#f5f5f5;}
+.bol{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);}.bol:hover{background:rgba(255,255,255,.25);}
+.bbl{background:#005CA9;color:#fff;}.bbl:hover{background:#004a8a;}
+.bgr{background:#22c55e;color:#fff;}.bgr:hover{background:#16a34a;}
+.bgy{background:#334155;color:#94a3b8;}.bgy:hover{background:#475569;color:#fff;}
+.bred{background:#ef4444;color:#fff;}.bred:hover{background:#dc2626;}
+.lbtn{padding:4px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
+.lbtn.on{background:#fff;color:var(--or);}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* ═══════════════════════════════════════
+   SIDEBAR GAUCHE
+═══════════════════════════════════════ */
+.sb{width:280px;min-width:260px;background:var(--sb);border-right:1px solid var(--brd);overflow-y:auto;flex-shrink:0;}
+.sbs{border-bottom:1px solid var(--brd);padding:12px 13px;}
+.sbs h3{color:var(--tx2);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px;}
+.sbs h3 i{color:var(--or);}
+.fg{margin-bottom:9px;}
+.fg label{display:block;color:var(--tx);font-size:11px;font-weight:500;margin-bottom:3px;}
+.fg input,.fg select{width:100%;padding:6px 9px;background:var(--dk);border:1.5px solid #334155;border-radius:6px;color:#fff;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus{border-color:var(--or);}
+.fg input::placeholder{color:#475569;}
+.cc{font-size:9.5px;color:#64748b;text-align:right;margin-top:2px;}
+.uz{border:2px dashed #334155;border-radius:8px;padding:13px;text-align:center;cursor:pointer;background:var(--dk);position:relative;transition:all .2s;margin-bottom:6px;}
+.uz:hover,.uz.dov{border-color:var(--or);background:rgba(236,102,8,.06);}
+.uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uz-ic{font-size:20px;color:#475569;margin-bottom:4px;}
+.uz-tx{color:var(--tx2);font-size:11px;}
+.uz-sx{color:#475569;font-size:9.5px;margin-top:2px;}
+#qrThumb{width:60px;height:60px;object-fit:contain;border:2px solid var(--or);border-radius:6px;margin:6px auto 0;display:none;}
+.bl{max-height:150px;overflow-y:auto;margin-top:5px;}
+.bi{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:var(--dk);border-radius:5px;margin-bottom:3px;border:1px solid #1e293b;}
+.bi-nm{color:#e2e8f0;font-size:11px;font-weight:600;}
+.bi-cd{color:#94a3b8;font-size:9px;}
+.bi-bb{display:flex;gap:3px;}
+.bib{width:20px;height:20px;border-radius:4px;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.bib-ld{background:rgba(0,92,169,.2);color:#60a5fa;}
+.bib-dl{background:rgba(239,68,68,.2);color:#ef4444;}
+.prog{width:100%;height:4px;background:#1e293b;border-radius:2px;margin:5px 0;display:none;}
+.pf{height:100%;background:var(--or);border-radius:2px;transition:width .3s;}
+
+/* ═══════════════════════════════════════
+   CANVAS CENTER
+═══════════════════════════════════════ */
+.ca{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0a0f1e;}
+.ctb{background:var(--sb);border-bottom:1px solid var(--brd);padding:6px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.tg{display:flex;align-items:center;gap:3px;padding-right:8px;border-right:1px solid var(--brd);}
+.tg:last-child{border:none;}
+.tbtn{width:28px;height:28px;border-radius:5px;border:none;background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.tbtn:hover{background:rgba(236,102,8,.2);color:var(--or);}
+.tbtn.on{background:rgba(236,102,8,.3);color:var(--or);}
+.zv{color:#94a3b8;font-size:11px;font-weight:600;min-width:36px;text-align:center;}
+.cvp{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:28px;}
+
+/* ═══════════════════════════════════════
+   PANNEAU DROITE — Propriétés
+═══════════════════════════════════════ */
+.rp{width:240px;min-width:220px;background:var(--sb);border-left:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;}
+.rph{padding:11px 13px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;}
+.rph h3{color:#e2e8f0;font-size:12px;font-weight:700;}
+.rpb{flex:1;overflow-y:auto;padding:12px 13px;}
+.rpe{color:#475569;font-size:11px;text-align:center;padding-top:28px;line-height:1.9;}
+.rpe i{font-size:22px;color:#334155;display:block;margin-bottom:7px;}
+.prw{margin-bottom:10px;}
+.prw label{display:block;color:var(--tx2);font-size:9.5px;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.prw input,.prw select{width:100%;padding:5px 8px;background:var(--dk);border:1.5px solid #334155;border-radius:5px;color:#fff;font-size:11.5px;font-family:inherit;outline:none;}
+.prw input:focus{border-color:var(--or);}
+.prw input[type=color]{height:30px;padding:2px 3px;cursor:pointer;}
+.prw input[type=range]{padding:0;accent-color:var(--or);}
+.prsep{height:1px;background:var(--brd);margin:9px 0;}
+.prrow{display:flex;gap:5px;}
+.prrow .btn{flex:1;justify-content:center;font-size:10px;padding:5px;}
+.pbadge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9px;font-weight:700;background:rgba(236,102,8,.2);color:var(--or);margin-bottom:8px;}
+
+/* ═══════════════════════════════════════
+   AFFICHE A4 — 794 × 1123 px
+═══════════════════════════════════════ */
+.poster-wrap{transform-origin:top center;}
+.poster{
+  width:794px;height:1123px;
+  background:#EC6608;
+  position:relative;
+  font-family:Arial,sans-serif;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  cursor:default;
+}
+
+/* ── Zone TOP orange ── */
+.p-top{
+  position:absolute;top:0;left:0;right:0;height:175px;
+  background:#EC6608;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+
+/* ── Logo Moov Money ── */
+.p-logo{
+  width:110px;height:110px;
+  cursor:move;position:relative;
+}
+.p-logo svg{width:100%;height:100%;}
+
+/* ── URL ── */
+.p-url{
+  font-family:Arial;font-size:22px;font-weight:900;
+  color:#fff;letter-spacing:.5px;
+  cursor:move;white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,.25);
+  padding:2px 6px;border-radius:4px;
+}
+
+/* ── Carte blanche ── */
+.p-card{
+  position:absolute;left:63px;top:175px;
+  width:668px;height:820px;
+  background:#fff;border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 32px 12px;
+  overflow:visible;
+}
+
+/* ── Nom marchand ── */
+.p-name{
+  font-family:Arial;font-size:40px;font-weight:900;
+  color:#000;text-align:center;text-transform:uppercase;
+  letter-spacing:2px;line-height:1.1;
+  width:100%;margin-bottom:4px;
+  cursor:move;padding:2px;border-radius:3px;
+}
+
+/* ── Label code ── */
+.p-codelabel{
+  font-family:Arial;font-size:24px;font-weight:700;
+  color:#005CA9;text-align:center;margin-bottom:6px;
+  cursor:move;padding:2px;border-radius:3px;
+}
+
+/* ── Boîtes code ── */
+.p-codebox-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:3px;margin-bottom:12px;flex-wrap:nowrap;
+}
+.cbox{
+  display:flex;align-items:center;justify-content:center;
+  border:2.5px solid #000;border-radius:3px;
+  font-family:Arial;font-weight:900;color:#000;background:#fff;
+  flex-shrink:0;
+}
+
+/* ── QR Container ── */
+.p-qr{
+  width:380px;height:380px;
+  border:6px solid #000;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  margin-bottom:10px;cursor:move;
+}
+.p-qr img,.p-qr canvas{width:100%;height:100%;object-fit:contain;display:block;}
+
+/* ── Drapeaux CEMAC (CSS only, pas d'images pour éviter tout artefact à l'export) ── */
+.p-flags{
+  display:flex;align-items:stretch;
+  gap:0;width:380px;height:42px;margin-bottom:9px;cursor:move;
+  overflow:hidden;flex-shrink:0;
+}
+.fi{
+  flex:1;display:block;
+  overflow:hidden;
+}
+/* Chaque .fi-* dessine le drapeau en pur CSS, pour que l'écran et l'export soient strictement identiques */
+.fi-ga{
+  /* Gabon : bandes horizontales vert / jaune / bleu */
+  background:
+    linear-gradient(to bottom,
+      #009E60 0 33.33%,
+      #FCD116 33.33% 66.66%,
+      #3A75C4 66.66% 100%);
+}
+.fi-cm{
+  /* Cameroun : bandes verticales vert / rouge / jaune */
+  background:
+    linear-gradient(to right,
+      #007A5E 0 33.33%,
+      #CE1126 33.33% 66.66%,
+      #FCD116 66.66% 100%);
+}
+.fi-gq{
+  /* Guinée Équatoriale : vert / blanc / rouge + triangle bleu à gauche */
+  background:
+    linear-gradient(to bottom,
+      #3E9A00 0 33.33%,
+      #FFFFFF 33.33% 66.66%,
+      #E32118 66.66% 100%),
+    linear-gradient(135deg,
+      #0073CE 0 50%,
+      transparent 50% 100%);
+  background-repeat:no-repeat;
+  background-size:100% 100%, 50% 100%;
+  background-position:0 0, 0 0;
+}
+.fi-cg{
+  /* Congo : diagonale verte / jaune / rouge */
+  background:
+    linear-gradient(135deg,
+      #009A44 0 45%,
+      #F7E017 45% 55%,
+      #DC241F 55% 100%);
+}
+.fi-cf{
+  /* Centrafrique : bleu / blanc / vert / jaune + bande rouge verticale */
+  background:
+    linear-gradient(to bottom,
+      #003082 0 25%,
+      #FFFFFF 25% 50%,
+      #289728 50% 75%,
+      #FFCB00 75% 100%),
+    linear-gradient(to right,
+      transparent 0 40%,
+      #BC0026 40% 60%,
+      transparent 60% 100%);
+  background-repeat:no-repeat;
+  background-size:100% 100%, 100% 100%;
+}
+.fi-td{
+  /* Tchad : bleu / jaune / rouge vertical */
+  background:
+    linear-gradient(to right,
+      #002664 0 33.33%,
+      #FECB00 33.33% 66.66%,
+      #C60C30 66.66% 100%);
+}
+
+/* ── GIMACPAY ── */
+.p-gimacpay{
+  display:flex;align-items:center;justify-content:center;
+  width:277px;height:98px;
+  margin:0 auto 7px auto;
+  cursor:move;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.p-gimacpay img{
+  width:277px;height:98px;
+  object-fit:contain;
+  display:block;
+}
+
+/* ── VOS PAIEMENTS ── */
+.p-vos{
+  font-family:Arial;font-size:18px;font-weight:900;
+  color:#0d0d0d;text-align:center;text-transform:uppercase;
+  letter-spacing:.5px;line-height:1;
+  cursor:move;padding:0;margin:0;border-radius:3px;
+  white-space:nowrap;
+}
+
+/* ── Zone BAS orange ── */
+.p-bot{
+  position:absolute;bottom:0;left:0;right:0;height:128px;
+  background:#EC6608;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 36px;
+}
+.p-cap{
+  background:#fff;border-radius:50px;
+  width:190px;height:78px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:move;overflow:hidden;padding:8px 16px;
+}
+.p-cap img{max-height:58px;max-width:158px;object-fit:contain;}
+.p-cap-txt{font-family:Arial;font-size:13px;font-weight:900;color:#005CA9;display:none;}
+
+/* ═══════════════════════════════════════
+   EDIT HIGHLIGHTS
+═══════════════════════════════════════ */
+.editable{transition:outline .12s,background .12s;}
+.editable:hover{outline:2px dashed rgba(0,92,169,.5);outline-offset:3px;}
+.editable.sel{outline:2.5px solid #005CA9!important;outline-offset:3px;background:rgba(0,92,169,.06)!important;}
+
+/* ═══════════════════════════════════════
+   STATUS
+═══════════════════════════════════════ */
+.stb{background:var(--sb);border-top:1px solid var(--brd);padding:4px 13px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#475569;flex-shrink:0;}
+.sdot{width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;}
+
+/* ═══════════════════════════════════════
+   TOAST & MODAL
+═══════════════════════════════════════ */
+.toast{position:fixed;bottom:16px;right:16px;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9000;transform:translateY(60px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:6px;box-shadow:0 5px 18px rgba(0,0,0,.35);}
+.toast.show{transform:translateY(0);opacity:1;}
+.tok{background:#22c55e;color:#fff;}.twn{background:#f59e0b;color:#fff;}.ter{background:#ef4444;color:#fff;}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:8000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.mov.op{opacity:1;pointer-events:all;}
+.mbox{background:var(--sb);border-radius:12px;padding:22px;width:430px;max-width:95%;border:1px solid var(--brd);box-shadow:0 20px 50px rgba(0,0,0,.5);}
+.mbox h3{color:#fff;font-size:15px;font-weight:700;margin-bottom:12px;}
+.mclose{float:right;background:none;border:none;color:#94a3b8;font-size:15px;cursor:pointer;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--dk);}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
+
+/* PRINT */
+@media print{
+  .hdr,.sb,.rp,.ctb,.stb{display:none!important;}
+  .ca{overflow:visible!important;}
+  .cvp{padding:0!important;}
+  .poster-wrap{transform:none!important;}
+  .poster{box-shadow:none!important;width:210mm!important;height:297mm!important;}
+  .editable{outline:none!important;background:transparent!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="hdr">
+  <div class="hbrand">
+    <span style="font-size:22px;">🖨️</span>
+    <div><h1>QR Poster Studio</h1><span>Moov Money Gabon — v2.3</span></div>
+  </div>
+  <div class="hactions">
+    <button class="btn bgr" onclick="doExportPDF()"><i class="fas fa-file-pdf"></i> PDF 300dpi</button>
+    <button class="btn bbl" onclick="doExportPNG()"><i class="fas fa-image"></i> PNG</button>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside class="sb">
+
+  <div class="sbs">
+    <h3><i class="fas fa-store"></i> Infos Marchand</h3>
+    <div class="fg">
+      <label>Nom du marchand</label>
+      <input id="iName" type="text" placeholder="MEGA MARKET" maxlength="50" oninput="liveName(this)">
+      <div class="cc"><span id="nc">0</span>/50</div>
+    </div>
+    <div class="fg">
+      <label>Code marchand</label>
+      <input id="iCode" type="text" placeholder="MEGAMARKET" maxlength="20" oninput="liveCode(this)">
+      <div class="cc"><span id="cc2">0</span>/20</div>
+    </div>
+    <button class="btn bbl" style="width:100%;justify-content:center;" onclick="applyMerchant()">
+      <i class="fas fa-check"></i> Appliquer à l'affiche
+    </button>
+  </div>
+
+  <div class="sbs">
+    <h3><i class="fas fa-qrcode"></i> QR Code</h3>
+    <div class="fg">
+      <label>Contenu QR (URL/texte)</label>
+      <input id="iQrTxt" type="text" placeholder="https://pay.moovmoney.ga/..." oninput="refreshQR()">
+    </div>
+    <div class="fg">
+      <label>Importer QR (PNG / JPG / PDF)</label>
+      <div class="uz" id="qrZone"
+           ondragover="event.preventDefault();this.classList.add('dov')"
+           ondragleave="this.classList.remove('dov')"
+           ondrop="dropQR(event)">
+        <input type="file" id="qrFile" accept="image/*,.pdf" onchange="fileQR(event)">
+        <div class="uz-ic">📷</div>
+        <div class="uz-tx">Glisser / cliquer</div>
+        <div class="uz-sx">PNG · JPG · <strong style="color:var(--or)">PDF</strong></div>
+      </div>
+      <img id="qrThumb" alt="QR preview">
+    </div>
+    <button id="btnClearQR" class="btn bgy" style="width:100%;justify-content:center;font-size:10.5px;display:none;" onclick="clearQR()">
+      <i class="fas fa-times"></i> Effacer QR importé
+    </button>
+  </div>
+
+  <div class="sbs">
+    <h3><i class="fas fa-download"></i> Export</h3>
+    <div class="fg">
+      <label>Format</label>
+      <select id="eFmt"><option value="A4">A4 (210×297 mm)</option><option value="A5">A5 (148×210 mm)</option></select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <button class="btn bgr" style="justify-content:center;" onclick="doExportPDF()"><i class="fas fa-file-pdf"></i> Export PDF 300 DPI</button>
+      <button class="btn bbl" style="justify-content:center;" onclick="doExportPNG()"><i class="fas fa-image"></i> Export PNG 300 DPI</button>
+    </div>
+  </div>
+
+  <div class="sbs">
+    <h3><i class="fas fa-file-csv"></i> Batch</h3>
+    <div class="fg" style="display:flex;flex-direction:column;gap:4px;">
+      <div>
+        <button class="btn bgy" style="width:100%;justify-content:center;" onclick="document.getElementById('csvFileInput').click();">
+          <i class="fas fa-upload"></i> Importer CSV
+        </button>
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" onchange="fileCSV(event)">
+      </div>
+      <div>
+        <button class="btn bgy" style="width:100%;justify-content:center;" onclick="openCSV()">
+          <i class="fas fa-clipboard"></i> Coller CSV
+        </button>
+      </div>
+    </div>
+    <div id="blist" style="margin-top:8px;max-height:120px;overflow:auto;"></div>
+    <div id="bacts" style="display:none;flex-direction:column;gap:4px;margin-top:6px;">
+      <div style="display:flex;gap:4px;">
+        <button class="btn bgy" style="flex:1;" onclick="clearBatch()"><i class="fas fa-trash"></i> Effacer liste</button>
+        <button class="btn bgr" style="flex:1;" onclick="batchExportPDF()"><i class="fas fa-file-pdf"></i> PDF multi-pages</button>
+      </div>
+      <div id="bprog" style="height:4px;background:#1e293b;margin-top:4px;display:none;">
+        <div id="bfill" style="height:100%;background:var(--or);width:0%;"></div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ══════════════ CANVAS ══════════════ -->
+<div class="ca">
+  <div class="cvp" id="cvp">
+    <div class="poster-wrap" id="pw">
+
+      <!-- ════════════════════════════════
+           AFFICHE A4 — 794 × 1123 px
+      ════════════════════════════════ -->
+      <div class="poster" id="poster">
+
+        <!-- ZONE TOP -->
+        <div class="p-top" id="zoneTop">
+
+          <!-- Logo Moov Money -->
+          <div class="p-logo editable" id="elLogo" data-label="Logo Moov Money" data-type="image">
+            <img src="assets/logoMoov.PNG" alt="Logo Moov Money" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+
+          <!-- URL -->
+          <div class="p-url editable" id="elUrl" data-label="URL moovmoney.ga" data-type="text">
+            moovmoney.ga
+          </div>
+
+        </div><!-- /p-top -->
+
+        <!-- CARTE BLANCHE -->
+        <div class="p-card" id="pCard">
+
+          <!-- Nom marchand -->
+          <div class="p-name editable" id="elName" data-label="Nom marchand" data-type="text">
+            NOM DU MARCHAND
+          </div>
+
+          <!-- Label code -->
+          <div class="p-codelabel editable" id="elCodeLbl" data-label="Label Code marchand" data-type="text">
+            Code marchand
+          </div>
+
+          <!-- Boîtes code -->
+          <div class="p-codebox-row" id="cboxRow"></div>
+
+          <!-- QR -->
+          <div class="p-qr editable" id="elQR" data-label="QR Code" data-type="image">
+            <canvas id="qrCanvas" width="368" height="368"></canvas>
+          </div>
+
+          <!-- Drapeaux CEMAC — ordre : GA CM GQ CG CF TD — 380×42px sans espace —
+               Chaque drapeau = flex:1 → 6 parts égales de 380/6 ≈ 63.3 × 42 px -->
+          <div class="p-flags editable" id="elFlags" data-label="Drapeaux CEMAC" data-type="image">
+            <!-- Chaque drapeau est dessiné en CSS via les classes fi-* pour garantir un rendu identique à l'écran et à l'export -->
+            <div class="fi fi-ga" title="Gabon"></div>
+            <div class="fi fi-cm" title="Cameroun"></div>
+            <div class="fi fi-gq" title="Guinée Équatoriale"></div>
+            <div class="fi fi-cg" title="Congo"></div>
+            <div class="fi fi-cf" title="Centrafrique"></div>
+            <div class="fi fi-td" title="Tchad"></div>
+          </div>
+
+          <!-- GIMACPAY — 277×98px (+30%), lettres uniquement -->
+          <div class="p-gimacpay editable" id="elGimacpay" data-label="Logo GIMACPAY" data-type="image">
+            <img src="assets/logo-gimacpay.png" alt="GIMACPAY"
+                 style="width:277px;height:98px;object-fit:contain;display:block;">
+          </div>
+
+          <!-- VOS PAIEMENTS -->
+          <div class="p-vos editable" id="elVos" data-label="VOS PAIEMENTS" data-type="text">VOS PAIEMENTS MOBILES ACCEPTÉS ICI</div>
+
+        </div><!-- /p-card -->
+
+        <!-- ZONE BAS -->
+        <div class="p-bot">
+          <!-- Capsule maDIGIPRIE -->
+          <div class="p-cap editable" id="elMadigi" data-label="Logo maDIGIPRIE" data-type="image">
+            <img src="assets/logo-madigi.png" alt="maDIGIPRIE"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="p-cap-txt">maDIGIPRIE</span>
+          </div>
+          <!-- Capsule GIMAC -->
+          <div class="p-cap editable" id="elGimac" data-label="Logo GIMAC" data-type="image">
+            <img src="assets/logo-gimac.png" alt="GIMAC"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="p-cap-txt">GIMAC</span>
+          </div>
+        </div>
+
+      </div><!-- /poster -->
+    </div><!-- /poster-wrap -->
+  </div><!-- /cvp -->
+</div><!-- /ca -->
+
+<!-- ══════════════ PANNEAU DROITE ══════════════ -->
+<aside class="rp" style="display:none;">
+  <div class="rph">
+    <h3 id="rpTitle">✏️ Propriétés</h3>
+  </div>
+  <div class="rpb" id="rpBody">
+
+    <div id="rpEmpty" class="rpe">
+      <i class="fas fa-mouse-pointer"></i>
+      Activez le mode <strong style="color:var(--or);">Édition</strong><br>
+      puis cliquez sur un<br>élément de l'affiche
+    </div>
+
+    <div id="rpProps" style="display:none;">
+      <div class="pbadge" id="rpBadge">—</div>
+
+      <!-- Texte -->
+      <div class="prw" id="prTxtRow">
+        <label>Texte</label>
+        <input type="text" id="prTxt" oninput="applyProp('text',this.value)" placeholder="Contenu…">
+      </div>
+
+      <!-- Police -->
+      <div class="prw" id="prFsRow">
+        <label>Taille police (px)</label>
+        <input type="number" id="prFs" min="6" max="200" oninput="applyProp('fontSize',this.value+'px')">
+      </div>
+
+      <!-- Couleur texte -->
+      <div class="prw" id="prColRow">
+        <label>Couleur</label>
+        <input type="color" id="prCol" oninput="applyProp('color',this.value)">
+      </div>
+
+      <!-- Alignement -->
+      <div class="prw" id="prAlnRow">
+        <label>Alignement</label>
+        <select id="prAln" onchange="applyProp('textAlign',this.value)">
+          <option value="left">◀ Gauche</option>
+          <option value="center" selected>■ Centre</option>
+          <option value="right">▶ Droite</option>
+        </select>
+      </div>
+
+      <!-- Gras / Italique -->
+      <div class="prw" id="prStyleRow">
+        <label>Style</label>
+        <div style="display:flex;gap:4px;">
+          <button class="btn bgy" id="prBold" onclick="toggleBold()" style="flex:1;justify-content:center;font-size:12px;padding:5px;"><b>G</b></button>
+          <button class="btn bgy" id="prItalic" onclick="toggleItalic()" style="flex:1;justify-content:center;font-size:12px;padding:5px;font-style:italic;">I</button>
+        </div>
+      </div>
+
+      <div class="prsep"></div>
+
+      <!-- Image : remplacer -->
+      <div class="prw" id="prImgRow" style="display:none;">
+        <label>Remplacer l'image</label>
+        <div class="uz" style="padding:10px;">
+          <input type="file" id="prImgFile" accept="image/*,.pdf" onchange="replaceImage(event)">
+          <div class="uz-ic" style="font-size:16px;">🖼️</div>
+          <div class="uz-tx" style="font-size:10.5px;">Cliquer pour choisir</div>
+          <div class="uz-sx">PNG · JPG · PDF</div>
+        </div>
+      </div>
+
+      <div class="prsep"></div>
+
+      <!-- Position -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div class="prw">
+          <label>Position X</label>
+          <input type="number" id="prX" oninput="applyPos('x',+this.value)">
+        </div>
+        <div class="prw">
+          <label>Position Y</label>
+          <input type="number" id="prY" oninput="applyPos('y',+this.value)">
+        </div>
+      </div>
+
+      <!-- Taille -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div class="prw">
+          <label>Largeur</label>
+          <input type="number" id="prW" oninput="applySize('w',+this.value)">
+        </div>
+        <div class="prw">
+          <label>Hauteur</label>
+          <input type="number" id="prH" oninput="applySize('h',+this.value)">
+        </div>
+      </div>
+
+      <!-- Opacité -->
+      <div class="prw">
+        <label>Opacité — <span id="prOpV">100%</span></label>
+        <input type="range" id="prOp" min="0" max="1" step="0.05" value="1"
+               oninput="applyProp('opacity',+this.value);prOpV.textContent=Math.round(this.value*100)+'%'">
+      </div>
+
+      <div class="prsep"></div>
+
+      <div class="prrow">
+        <button class="btn bgy" onclick="dupEl()" style="flex:1;justify-content:center;font-size:10px;"><i class="fas fa-copy"></i> Dupliquer</button>
+        <button class="btn bred" onclick="hideEl()" style="flex:1;justify-content:center;font-size:10px;"><i class="fas fa-eye-slash"></i> Masquer</button>
+      </div>
+      <div class="prrow" style="margin-top:4px;">
+        <button class="btn bgy" onclick="resetEl()" style="width:100%;justify-content:center;font-size:10px;"><i class="fas fa-undo"></i> Réinitialiser cet élément</button>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+</div><!-- /main -->
+
+<!-- STATUS -->
+<div class="stb">
+  <div><span class="sdot"></span>QR Poster Studio v2.3 — Prêt</div>
+  <div id="stInf">A4 · 794×1123 px · Mode Édition</div>
+  <div>Moov Money Gabon © 2026</div>
+</div>
+
+<!-- MODAL CSV -->
+<div class="mov" id="csvMod">
+  <div class="mbox">
+    <button class="mclose" onclick="document.getElementById('csvMod').classList.remove('op')">✕</button>
+    <h3><i class="fas fa-file-csv" style="color:#22c55e;margin-right:7px;"></i>Import CSV</h3>
+    <div class="fg" style="margin-top:10px;">
+      <label>Format : <code style="color:#22c55e;background:#0f172a;padding:2px 5px;border-radius:4px;">nom,code</code></label>
+      <textarea id="csvTA" rows="7" style="width:100%;padding:8px;background:#0f172a;border:1.5px solid #334155;border-radius:6px;color:#fff;font-family:monospace;font-size:11px;resize:vertical;outline:none;margin-top:5px;" placeholder="MEGA MARKET,MEGAMARKET&#10;SUPER STORE,SUPERST001"></textarea>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px;">
+      <button class="btn bgr" style="flex:1;justify-content:center;" onclick="parseCSVModal()"><i class="fas fa-play"></i> Importer</button>
+      <button class="btn bgy" style="flex:1;justify-content:center;" onclick="document.getElementById('csvMod').classList.remove('op')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"><span id="toastMsg">—</span></div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// pdf.js n'est plus initialisé à l'avance — il est chargé à la demande
+// dans importQRfromPDF() et importPDFasImage(), qui fixent aussi le worker.
+// (La fonction initPDFjs et son appel étaient ici, mais ils sont désormais inutiles.)
+
+// ═══════ STATE ═══════
+let Z=0.75, editMode=true, selEl=null, batch=[], qrImported=false, currentBatchIndex=undefined;
+const origStyles={}; // pour reset
+
+// ═══════ ZOOM ═══════
+function doZoom(d){ Z=Math.max(0.15,Math.min(2,Z+d)); applyZ(); }
+function zoomFit(){
+  const vp=document.getElementById('cvp');
+  Z=Math.min((vp.clientWidth-60)/794,(vp.clientHeight-40)/1123);
+  applyZ();
+}
+function applyZ(){
+  const pw=document.getElementById('pw');
+  pw.style.transform=`scale(${Z})`;
+  pw.style.transformOrigin='top center';
+  pw.style.marginBottom=(1123*(Z-1))+'px';
+  const zvlEl = document.getElementById('zvl');
+  if(zvlEl) zvlEl.textContent=Math.round(Z*100)+'%';
+}
+
+// ═══════ EDIT MODE ═══════
+function toggleEdit(){
+  editMode=!editMode;
+  const btn=document.getElementById('btnEd');
+  const edLbl=document.getElementById('edLbl');
+  if(edLbl) edLbl.textContent=editMode?'Édition ON':'Aperçu';
+  if(btn) btn.classList.toggle('on',editMode);
+  document.querySelectorAll('.editable').forEach(el=>{
+    el.style.cursor=editMode?'move':'default';
+  });
+  if(!editMode) deselectAll();
+  const stInf=document.getElementById('stInf');
+  if(stInf) stInf.textContent=editMode?'A4 · Mode Édition actif':'A4 · Mode Aperçu';
+}
+
+// ═══════ SELECTION ═══════
+function selectEl(el){
+  deselectAll();
+  selEl=el;
+  el.classList.add('sel');
+  const selLabel = document.getElementById('selLabel');
+  if(selLabel) selLabel.textContent='✏️ '+( el.dataset.label||el.id);
+  showProps(el);
+}
+function deselectAll(){
+  document.querySelectorAll('.editable.sel').forEach(e=>e.classList.remove('sel'));
+  selEl=null;
+  const selLabel = document.getElementById('selLabel');
+  if(selLabel) selLabel.textContent='Aucun élément sélectionné';
+  const rpEmpty = document.getElementById('rpEmpty');
+  const rpProps = document.getElementById('rpProps');
+  if(rpEmpty) rpEmpty.style.display='block';
+  if(rpProps) rpProps.style.display='none';
+}
+
+// ═══════ PROPERTIES PANEL ═══════
+function showProps(el){
+  document.getElementById('rpEmpty').style.display='none';
+  document.getElementById('rpProps').style.display='block';
+  document.getElementById('rpBadge').textContent=el.dataset.label||el.id;
+  const type=el.dataset.type;
+  const isText=type==='text';
+  const isImg=type==='image';
+  // show/hide rows
+  ['prTxtRow','prFsRow','prColRow','prAlnRow','prStyleRow'].forEach(id=>{
+    document.getElementById(id).style.display=isText?'block':'none';
+  });
+  document.getElementById('prImgRow').style.display=isImg?'block':'none';
+  if(isText){
+    document.getElementById('prTxt').value=el.innerText.trim();
+    const cs=getComputedStyle(el);
+    document.getElementById('prFs').value=parseInt(cs.fontSize)||16;
+    document.getElementById('prCol').value=rgb2hex(cs.color);
+    document.getElementById('prAln').value=cs.textAlign||'center';
+    document.getElementById('prBold').classList.toggle('bbl',cs.fontWeight>='700');
+    document.getElementById('prItalic').classList.toggle('bbl',cs.fontStyle==='italic');
+  }
+  const r=el.getBoundingClientRect();
+  const pr=document.getElementById('poster').getBoundingClientRect();
+  document.getElementById('prX').value=Math.round((r.left-pr.left)/Z);
+  document.getElementById('prY').value=Math.round((r.top-pr.top)/Z);
+  document.getElementById('prW').value=Math.round(r.width/Z);
+  document.getElementById('prH').value=Math.round(r.height/Z);
+  document.getElementById('prOp').value=parseFloat(el.style.opacity)||1;
+  document.getElementById('prOpV').textContent=Math.round((parseFloat(el.style.opacity)||1)*100)+'%';
+  document.getElementById('rpTitle').textContent='✏️ '+(el.dataset.label||'Propriétés');
+}
+
+function applyProp(prop,val){
+  if(!selEl)return;
+  if(prop==='text'){
+    selEl.innerText=val;
+    // Rebuild code boxes if code label
+    if(selEl.id==='elCodeLbl') selEl.innerText=val;
+  } else if(prop==='fontSize'){
+    selEl.style.fontSize=val;
+  } else if(prop==='color'){
+    selEl.style.color=val;
+  } else if(prop==='textAlign'){
+    selEl.style.textAlign=val;
+  } else if(prop==='opacity'){
+    selEl.style.opacity=val;
+    document.getElementById('prOpV').textContent=Math.round(val*100)+'%';
+  }
+}
+function applyPos(axis,v){
+  if(!selEl)return;
+  const pr=document.getElementById('poster').getBoundingClientRect();
+  const r=selEl.getBoundingClientRect();
+  if(axis==='x'){
+    const cur=(r.left-pr.left)/Z;
+    selEl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)+(v-cur))+'px';
+  } else {
+    const cur=(r.top-pr.top)/Z;
+    selEl.style.marginTop=(parseFloat(selEl.style.marginTop||0)+(v-cur))+'px';
+  }
+}
+function applySize(axis,v){
+  if(!selEl||v<=0)return;
+  if(axis==='w') selEl.style.width=v+'px';
+  else selEl.style.height=v+'px';
+}
+function toggleBold(){
+  if(!selEl)return;
+  const cs=getComputedStyle(selEl);
+  const nb=cs.fontWeight>='700'?'normal':'900';
+  selEl.style.fontWeight=nb;
+  document.getElementById('prBold').classList.toggle('bbl',nb==='900');
+}
+function toggleItalic(){
+  if(!selEl)return;
+  const cs=getComputedStyle(selEl);
+  const ni=cs.fontStyle==='italic'?'normal':'italic';
+  selEl.style.fontStyle=ni;
+  document.getElementById('prItalic').classList.toggle('bbl',ni==='italic');
+}
+function dupEl(){
+  if(!selEl)return;
+  const cl=selEl.cloneNode(true);
+  cl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)+16)+'px';
+  cl.style.marginTop=(parseFloat(selEl.style.marginTop||0)+16)+'px';
+  cl.classList.remove('sel');
+  cl.id=selEl.id+'_copy'+Date.now();
+  selEl.parentNode.appendChild(cl);
+  bindEditable(cl);
+  toast('✅ Élément dupliqué');
+}
+function hideEl(){
+  if(!selEl)return;
+  selEl.style.visibility='hidden';
+  deselectAll();
+  toast('👁️ Élément masqué (reset pour le rendre visible)');
+}
+function resetEl(){
+  if(!selEl)return;
+  selEl.removeAttribute('style');
+  showProps(selEl);
+  toast('↩️ Élément réinitialisé');
+}
+
+// ═══════ REPLACE IMAGE ═══════
+function replaceImage(e){
+  const f=e.target.files[0]; if(!f)return;
+  if(f.type==='application/pdf'){
+    importPDFasImage(f,selEl);
+  } else {
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img=selEl.querySelector('img');
+      if(img){img.src=ev.target.result;img.style.display='block';}
+      else selEl.innerHTML=`<img src="${ev.target.result}" style="max-height:100%;max-width:100%;object-fit:contain;">`;
+      toast('🖼️ Image remplacée');
+    };
+    r.readAsDataURL(f);
+  }
+}
+async function importPDFasImage(f,target){
+  toast('⏳ Extraction PDF…','warn');
+  // S'assurer que pdf.js est disponible
+  if(typeof pdfjsLib==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=()=>{
+        pdfjsLib.GlobalWorkerOptions.workerSrc=
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        res();
+      };
+      s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  try{
+    const ab=await f.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(ab)}).promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:3});
+    const tmp=document.createElement('canvas');
+    tmp.width=vp.width; tmp.height=vp.height;
+    await page.render({canvasContext:tmp.getContext('2d'),viewport:vp}).promise;
+    const dataUrl=tmp.toDataURL('image/png',1);
+    if(target){
+      const img=target.querySelector('img');
+      if(img){img.src=dataUrl;img.style.display='block';}
+      else target.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;">`;
+    }
+    toast('✅ PDF extrait et appliqué !');
+  }catch(err){
+    console.error('PDF render error:',err);
+    toast('❌ Erreur PDF : '+err.message,'err');
+  }
+}
+
+// ═══════ QR ═══════
+function fileQR(e){ const f=e.target.files[0]; if(f) processQRFile(f); }
+function dropQR(e){
+  e.preventDefault();
+  document.getElementById('qrZone').classList.remove('dov');
+  const f=e.dataTransfer.files[0]; if(f) processQRFile(f);
+}
+function processQRFile(f){
+  if(f.type==='application/pdf') importQRfromPDF(f);
+  else { const r=new FileReader(); r.onload=ev=>setQRImg(ev.target.result); r.readAsDataURL(f); }
+}
+async function importQRfromPDF(f){
+  toast('⏳ Extraction QR du PDF…','warn');
+  // S'assurer que pdf.js est disponible
+  if(typeof pdfjsLib==='undefined'){
+    toast('⏳ Chargement pdf.js…','warn');
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=()=>{
+        pdfjsLib.GlobalWorkerOptions.workerSrc=
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        res();
+      };
+      s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  try{
+    const ab=await f.arrayBuffer();
+    const loadTask=pdfjsLib.getDocument({data:new Uint8Array(ab)});
+    const pdf=await loadTask.promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:3});
+    const tmp=document.createElement('canvas');
+    tmp.width=vp.width; tmp.height=vp.height;
+    const ctx=tmp.getContext('2d');
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    setQRImg(tmp.toDataURL('image/png',1));
+    toast('✅ QR extrait du PDF (page 1) !');
+  }catch(err){
+    console.error('PDF import error:',err);
+    toast('❌ Erreur PDF : '+err.message,'err');
+  }
+}
+function setQRImg(dataUrl){
+  qrImported=true;
+  const c=document.getElementById('elQR');
+  c.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;">`;
+  document.getElementById('qrThumb').src=dataUrl;
+  document.getElementById('qrThumb').style.display='block';
+  const btnClear = document.getElementById('btnClearQR');
+  if(btnClear){ btnClear.style.display='flex'; }
+  // sauvegarder le QR dans le marchand actuel du batch si applicable
+  if(window.currentBatchIndex!==undefined && batch[window.currentBatchIndex]){
+    batch[window.currentBatchIndex].qrData=dataUrl;
+    renderBatch();
+    toast('✅ QR importé pour '+batch[window.currentBatchIndex].name);
+  } else {
+    toast('✅ QR importé');
+  }
+}
+function clearQR(){
+  qrImported=false;
+  document.getElementById('qrThumb').style.display='none';
+  document.getElementById('qrFile').value='';
+  const c=document.getElementById('elQR');
+  // zone QR vide tant que l'utilisateur n'importe pas d'image
+  c.innerHTML='';
+  const btnClear = document.getElementById('btnClearQR');
+  if(btnClear){ btnClear.style.display='none'; }
+  // effacer le QR du marchand actuel du batch si applicable
+  if(window.currentBatchIndex!==undefined && batch[window.currentBatchIndex]){
+    batch[window.currentBatchIndex].qrData=null;
+    renderBatch();
+    toast('🗑️ QR effacé pour '+batch[window.currentBatchIndex].name);
+  } else {
+    toast('🗑️ QR effacé');
+  }
+}
+function refreshQR(){
+  // plus de génération automatique de QR "imaginaire"
+  // l'utilisateur doit importer un QR (image/PDF) pour remplir la zone
+}
+
+// ═══════ MARCHAND ═══════
+function liveName(el){
+  document.getElementById('nc').textContent=el.value.length;
+  document.getElementById('elName').innerText=el.value.toUpperCase()||'NOM DU MARCHAND';
+}
+function liveCode(el){
+  el.value=el.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  document.getElementById('cc2').textContent=el.value.length;
+  buildCodeBoxes(el.value);
+}
+function applyMerchant(){
+  const name=document.getElementById('iName').value.trim().toUpperCase()||'NOM DU MARCHAND';
+  const code=document.getElementById('iCode').value.trim().toUpperCase();
+  document.getElementById('elName').innerText=name;
+  buildCodeBoxes(code);
+  toast('✅ Marchand appliqué : '+name);
+}
+function buildCodeBoxes(code){
+  const row=document.getElementById('cboxRow');
+  row.innerHTML='';
+  const str=(code||'').trim();
+  if(!str) return;
+  const len=str.length;
+  const w=len>15?28:len>10?36:46;
+  const h=Math.round(w*1.17);
+  const fs=len>15?15:len>10?20:26;
+  for(const c of str){
+    const b=document.createElement('div');
+    b.className='cbox';
+    b.style.cssText=`width:${w}px;height:${h}px;font-size:${fs}px;`;
+    b.textContent=c;
+    row.appendChild(b);
+  }
+}
+
+// ═══════ DRAG & DROP ELEMENTS ═══════
+function bindEditable(el){
+  el.addEventListener('click',e=>{
+    if(!editMode)return;
+    e.stopPropagation();
+    selectEl(el);
+  });
+  // si interact.js est disponible, on utilise sa gestion de drag
+  if(typeof interact!=='undefined'){
+    interact(el).draggable({
+      allowFrom: 'body',
+      ignoreFrom: 'input, button',
+      listeners: {
+        start(event){ if(editMode) selectEl(el); },
+        move(event){
+          if(!editMode) return;
+          const dx = event.dx / Z;
+          const dy = event.dy / Z;
+          const currX = parseFloat(el.style.marginLeft)||0;
+          const currY = parseFloat(el.style.marginTop)||0;
+          el.style.marginLeft = (currX + dx) + 'px';
+          el.style.marginTop = (currY + dy) + 'px';
+          updatePosFields(el);
+        }
+      },
+      modifiers: [
+        interact.modifiers.restrictRect({
+          restriction: '#poster',
+          elementRect: { top:0,left:0,bottom:1,right:1 }
+        })
+      ]
+    });
+  }
+}
+
+function updatePosFields(el){
+  const r=el.getBoundingClientRect();
+  const pr=document.getElementById('poster').getBoundingClientRect();
+  document.getElementById('prX').value=Math.round((r.left-pr.left)/Z);
+  document.getElementById('prY').value=Math.round((r.top-pr.top)/Z);
+}
+function bindAll(){
+  document.querySelectorAll('.editable').forEach(bindEditable);
+}
+
+// ═══════ ADD TEXT ═══════
+function addTextEl(){
+  const el=document.createElement('div');
+  el.className='editable';
+  el.dataset.type='text';
+  el.dataset.label='Texte ajouté';
+  el.style.cssText='font-family:Arial;font-size:20px;font-weight:700;color:#000;text-align:center;cursor:move;padding:3px 6px;border-radius:3px;display:inline-block;white-space:nowrap;';
+  el.innerText='Nouveau texte';
+  el.contentEditable=editMode?'true':'false';
+  document.getElementById('pCard').appendChild(el);
+  bindEditable(el);
+  selectEl(el);
+  toast('✏️ Texte ajouté — cliquez pour sélectionner');
+}
+
+// ═══════ IMPORT IMAGE ═══════
+function importImageEl(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*,.pdf';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(f.type==='application/pdf'){
+      const el=document.createElement('div');el.className='editable';el.dataset.type='image';el.dataset.label='Image importée';
+      el.style.cssText='width:200px;height:100px;cursor:move;display:flex;align-items:center;justify-content:center;';
+      document.getElementById('pCard').appendChild(el);
+      bindEditable(el);selectEl(el);
+      importPDFasImage(f,el);
+    } else {
+      const r=new FileReader();r.onload=ev=>{
+        const el=document.createElement('div');el.className='editable';el.dataset.type='image';el.dataset.label='Image importée';
+        el.style.cssText='width:200px;height:100px;cursor:move;display:flex;align-items:center;justify-content:center;';
+        el.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+        document.getElementById('pCard').appendChild(el);
+        bindEditable(el);selectEl(el);
+        toast('🖼️ Image ajoutée');
+      };
+      r.readAsDataURL(f);
+    }
+  };
+  inp.click();
+}
+
+// ═══════ CSV ═══════
+function openCSV(){document.getElementById('csvMod').classList.add('op');}
+function fileCSV(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>parseCSV(ev.target.result);r.readAsText(f,'UTF-8');}
+function parseCSVModal(){parseCSV(document.getElementById('csvTA').value);document.getElementById('csvMod').classList.remove('op');}
+function parseCSV(txt){
+  const lines=txt.trim().split('\n').filter(l=>l.trim());
+  const items=[];
+  for(const l of lines){const p=l.split(/[,;|\t]/);if(p.length>=2)items.push({name:p[0].trim().replace(/["']/g,'').toUpperCase(),code:p[1].trim().replace(/["']/g,'').toUpperCase(),qrData:null});}
+  if(!items.length){toast('⚠️ Aucune donnée valide','warn');return;}
+  batch=items;renderBatch();toast(`✅ ${items.length} marchand(s) importé(s)`);
+  // mise en file de génération automatique pour le batch
+  if(batch.length) batchAll();
+}
+function renderBatch(){
+  const bl=document.getElementById('blist');bl.innerHTML='';
+  batch.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='bi';
+    const qrBadge=it.qrData?'<span style="font-size:9px;color:#22c55e;margin-left:6px;">📱 QR</span>':'';
+    d.innerHTML=`<div><div class="bi-nm">${it.name}${qrBadge}</div><div class="bi-cd">${it.code}</div></div>
+      <div class="bi-bb"><button class="bib bib-ld" onclick="loadBatch(${i})"><i class="fas fa-arrow-right"></i></button>
+      <button class="bib bib-dl" onclick="delBatch(${i})">✕</button></div>`;
+    bl.appendChild(d);
+  });
+  document.getElementById('bacts').style.display=batch.length?'flex':'none';
+}
+function loadBatch(i){
+  const it=batch[i];
+  // stocker l'indice du marchand actuel AVANT d'appliquer les changements
+  window.currentBatchIndex=i;
+  
+  document.getElementById('iName').value=it.name;document.getElementById('nc').textContent=it.name.length;
+  document.getElementById('iCode').value=it.code;document.getElementById('cc2').textContent=it.code.length;
+  applyMerchant();
+  // charger le QR code spécifique à ce marchand s'il existe
+  if(it.qrData){
+    qrImported=true;
+    const c=document.getElementById('elQR');
+    c.innerHTML=`<img src="${it.qrData}" style="width:100%;height:100%;object-fit:contain;">`;
+    document.getElementById('qrThumb').src=it.qrData;
+    document.getElementById('qrThumb').style.display='block';
+    const btnClear = document.getElementById('btnClearQR');
+    if(btnClear){ btnClear.style.display='flex'; }
+  } else {
+    clearQR();
+  }
+}
+function delBatch(i){batch.splice(i,1);renderBatch();}
+function clearBatch(){batch=[];renderBatch();}
+async function batchAll(){
+  if(!batch.length)return;
+  const p=document.getElementById('bprog'),f=document.getElementById('bfill');p.style.display='block';
+  for(let i=0;i<batch.length;i++){
+    f.style.width=Math.round(i/batch.length*100)+'%';
+    loadBatch(i);await new Promise(r=>setTimeout(r,400));
+  }
+  f.style.width='100%';toast(`✅ ${batch.length} générés`);
+  setTimeout(()=>{p.style.display='none';f.style.width='0%';},2000);
+}
+
+// ═══════ EXPORT ═══════
+async function doExportPDF(){
+  if(location.protocol==='file:'){
+    toast('❌ Export impossible en mode file://. Lance "serve.bat" puis ouvre http://localhost:8000/template-preview.html','err');
+    return;
+  }
+  toast('⏳ PDF en cours…','warn');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    deselectAll();
+    // Cloner l'affiche hors écran pour rendre sans les transforms/zoom actifs
+    const cv = await renderPosterAsCanvas();
+    const imgData = cv.toDataURL('image/png',1);
+    const {jsPDF}=window.jspdf;
+    const fmt=document.getElementById('eFmt').value;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:fmt==='A4'?'a4':'a5'});
+    pdf.addImage(imgData,'PNG',0,0,fmt==='A4'?210:148,fmt==='A4'?297:210,undefined,'FAST');
+    pdf.save(`Moov_QR_${(document.getElementById('iName').value||'affiche').replace(/\s+/g,'_')}_${fmt}.pdf`);
+    toast('✅ PDF exporté !');
+  }catch(err){
+    console.error(err);
+    const msg = err.message||err.toString();
+    if(msg.includes('secure')){
+      toast('❌ Opération bloquée (canvas sécurisée). Servez la page via HTTP/HTTPS ou utilisez un serveur local.','err');
+    } else if (typeof html2canvas==='undefined' || !window.jspdf) {
+      toast('❌ Librairies d’export non chargées. Vérifie ta connexion internet (cette démo charge html2canvas et jsPDF depuis le CDN).','err');
+    } else {
+      toast('❌ '+msg,'err');
+    }
+  }
+}
+async function doExportPNG(){
+  if(location.protocol==='file:'){
+    toast('❌ Export impossible en mode file://. Lance "serve.bat" puis ouvre http://localhost:8000/template-preview.html','err');
+    return;
+  }
+  toast('⏳ PNG en cours…','warn');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    deselectAll();
+    const cv = await renderPosterAsCanvas();
+    const blob = await new Promise((res,rej)=>{
+      cv.toBlob(b=>{ if(b)res(b); else rej(new Error('Impossible de créer le blob')); },'image/png',1);
+    });
+    const a=document.createElement('a');
+    a.download=`Moov_QR_${(document.getElementById('iName').value||'affiche').replace(/\s+/g,'_')}_300dpi.png`;
+    const url=URL.createObjectURL(blob);
+    a.href=url;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ PNG 300 DPI !');
+  }catch(err){
+    console.error(err);
+    const msg = err.message||err.toString();
+    if(msg.includes('secure')){
+      toast('❌ Opération bloquée (canvas sécurisée). Servez la page via HTTP/HTTPS ou utilisez un serveur local.','err');
+    } else if (typeof html2canvas==='undefined') {
+      toast('❌ Librairie d’export (html2canvas) non chargée. Vérifie ta connexion internet (cette démo la charge depuis le CDN).','err');
+    } else {
+      toast('❌ '+msg,'err');
+    }
+  }
+}
+
+// export batch - génère un PDF multi-pages contenant chaque affiche du CSV importé
+async function batchExportPDF(){
+  if(!batch.length){ toast('⚠️ Pas de marchands en batch','warn'); return; }
+  if(location.protocol==='file:'){
+    toast('❌ Export impossible en mode file://. Lance "serve.bat" puis ouvre http://localhost:8000/template-preview.html','err');
+    return;
+  }
+  toast('⏳ Création PDF multi-pages…','warn');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    deselectAll();
+    const {jsPDF}=window.jspdf;
+    const fmt=document.getElementById('eFmt').value;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:fmt==='A4'?'a4':'a5'});
+    const p=document.getElementById('bprog'),f=document.getElementById('bfill');
+    if(p){p.style.display='block'; f.style.width='0%';}
+    for(let i=0;i<batch.length;i++){
+      loadBatch(i);
+      // attendre que les changements (nom, code, QR) se reflètent dans le DOM
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const cv=await renderPosterAsCanvas();
+      const imgData=cv.toDataURL('image/png',1);
+      if(i>0) pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,0,fmt==='A4'?210:148,fmt==='A4'?297:210,'FAST');
+      if(f) f.style.width=Math.round((i+1)/batch.length*100)+'%';
+    }
+    pdf.save(`Batch_Marchands_${batch.length}.pdf`);
+    toast('✅ PDF batch exporté !');
+    if(p){setTimeout(()=>{p.style.display='none';f.style.width='0%';},1500);}
+  }catch(err){
+    console.error(err);
+    toast('❌ '+(err.message||err));
+  }
+}
+async function renderPosterAsCanvas(){
+  const poster = document.getElementById('poster');
+  // on travaille sur un CLONE hors écran pour ne plus toucher à l’UI visible
+  const clone = poster.cloneNode(true);
+  // nettoyer les états de sélection éventuels
+  clone.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));
+
+  // wrapper hors écran
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.background = '#EC6608';
+  wrapper.style.padding = '0';
+  wrapper.style.margin = '0';
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  // attendre un frame pour laisser le layout s’appliquer
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+
+  const cv = await html2canvas(clone,{
+    scale:3,
+    useCORS:true,
+    allowTaint:true,
+    backgroundColor:'#EC6608',
+    logging:false
+  });
+
+  document.body.removeChild(wrapper);
+  return cv;
+}
+function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+
+// ═══════ UTILS ═══════
+function rgb2hex(rgb){
+  if(!rgb||rgb==='transparent')return'#000000';
+  if(rgb.startsWith('#'))return rgb;
+  const m=rgb.match(/\d+/g);if(!m||m.length<3)return'#000000';
+  return'#'+[m[0],m[1],m[2]].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
+}
+function toast(msg,type='ok'){
+  const el=document.getElementById('toastEl');
+  document.getElementById('toastMsg').textContent=msg;
+  el.className='toast show '+(type==='warn'?'twn':type==='err'?'ter':'tok');
+  setTimeout(()=>el.classList.remove('show'),3200);
+}
+function setLang(l){
+  document.getElementById('bFR').classList.toggle('on',l==='fr');
+  document.getElementById('bEN').classList.toggle('on',l==='en');
+}
+
+// ═══════ KEYBOARD ═══════
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.ctrlKey&&e.key==='p'){e.preventDefault();window.print();}
+  if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doExportPDF();}
+  if(e.ctrlKey&&(e.key==='='||e.key==='+')){e.preventDefault();doZoom(0.1);}
+  if(e.ctrlKey&&e.key==='-'){e.preventDefault();doZoom(-0.1);}
+  if(e.ctrlKey&&e.key==='0'){e.preventDefault();zoomFit();}
+  if(!selEl)return;
+  const s=e.shiftKey?10:2;
+  if(e.key==='ArrowLeft'){e.preventDefault();selEl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)-s)+'px';}
+  if(e.key==='ArrowRight'){e.preventDefault();selEl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)+s)+'px';}
+  if(e.key==='ArrowUp'){e.preventDefault();selEl.style.marginTop=(parseFloat(selEl.style.marginTop||0)-s)+'px';}
+  if(e.key==='ArrowDown'){e.preventDefault();selEl.style.marginTop=(parseFloat(selEl.style.marginTop||0)+s)+'px';}
+  if(e.key==='Escape')deselectAll();
+  if(e.key==='Delete')hideEl();
+});
+
+// Clic hors élément = désélection
+document.getElementById('poster').addEventListener('click',e=>{
+  if(e.target===document.getElementById('poster')||
+     e.target===document.getElementById('pCard')||
+     e.target===document.getElementById('zoneTop')||
+     e.target===document.getElementById('p-bot'))
+    deselectAll();
+});
+
+// ═══════ INIT ═══════
+window.addEventListener('DOMContentLoaded',()=>{
+  // avertissement si la page est ouverte avec file://, ce qui entraine fréquemment
+  // des erreurs "The operation is insecure" lors des exports
+  if(location.protocol==='file:'){
+    toast('⚠️ Ouvrez cette page via un serveur local (http://localhost) pour permettre l\'export','warn');
+  }
+  // ajouter crossOrigin à toutes les images (utile lorsque certains assets sont chargés
+  // via CORS) pour éviter de contaminer le canevas
+  document.querySelectorAll('img').forEach(i=>i.setAttribute('crossorigin','anonymous'));
+
+  // état initial vide : l'utilisateur remplit tout manuellement
+  const iName = document.getElementById('iName');
+  const iCode = document.getElementById('iCode');
+  const iQrTxt = document.getElementById('iQrTxt');
+  const nc = document.getElementById('nc');
+  const cc2 = document.getElementById('cc2');
+  const qrThumb = document.getElementById('qrThumb');
+  const qrFile = document.getElementById('qrFile');
+  const btnClear = document.getElementById('btnClearQR');
+  const elName = document.getElementById('elName');
+
+  if(iName) iName.value='';
+  if(iCode) iCode.value='';
+  if(iQrTxt) iQrTxt.value='';
+  if(nc) nc.textContent='0';
+  if(cc2) cc2.textContent='0';
+  if(elName) elName.innerText='NOM DU MARCHAND';
+  buildCodeBoxes('');
+
+  // QR vide
+  qrImported=false;
+  if(qrThumb) qrThumb.style.display='none';
+  if(qrFile) qrFile.value='';
+  const elQR = document.getElementById('elQR');
+  if(elQR) elQR.innerHTML='';
+  if(btnClear) btnClear.style.display='none';
+
+  bindAll();
+  applyZ();
+  setTimeout(()=>{zoomFit();},200);
+
+  console.log('%c🖨️ QR Poster Studio v2.3','color:#EC6608;font-size:16px;font-weight:900;');
+  console.log('%c✅ HTML+CSS — affiche visible, édition directe','color:#22c55e;');
+});
+</script>
+</body>
+</html>
