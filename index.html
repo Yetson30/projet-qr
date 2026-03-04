@@ -1,1319 +1,1392 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture & Roadmap — QR Poster Studio | Moov Money Gabon</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR Poster Studio — Moov Money Gabon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<!-- interact.js pour le drag‑n‑drop des éléments, chargé en non‑bloquant -->
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" defer></script>
+<!-- pdf.js sera chargé à la demande (import PDF) pour éviter le blocage -->
+<style>
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --or:#EC6608; --bl:#005CA9; --wh:#fff; --bk:#0d0d0d;
+  --sb:#16213e; --dk:#0f172a; --brd:#2a3a5e; --tx:#cbd5e1; --tx2:#94a3b8;
+}
+body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ═══════════════════════════════════════
+   HEADER
+═══════════════════════════════════════ */
+.hdr{background:linear-gradient(135deg,#EC6608,#c95405);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:100;}
+.hbrand{display:flex;align-items:center;gap:10px;}
+.hbrand h1{color:#fff;font-size:16px;font-weight:700;}
+.hbrand span{color:rgba(255,255,255,.7);font-size:10px;display:block;}
+.hactions{display:flex;gap:6px;align-items:center;}
+.btn{padding:6px 13px;border-radius:7px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.bwh{background:#fff;color:var(--or);}.bwh:hover{background:#f5f5f5;}
+.bol{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);}.bol:hover{background:rgba(255,255,255,.25);}
+.bbl{background:#005CA9;color:#fff;}.bbl:hover{background:#004a8a;}
+.bgr{background:#22c55e;color:#fff;}.bgr:hover{background:#16a34a;}
+.bgy{background:#334155;color:#94a3b8;}.bgy:hover{background:#475569;color:#fff;}
+.bred{background:#ef4444;color:#fff;}.bred:hover{background:#dc2626;}
+.lbtn{padding:4px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
+.lbtn.on{background:#fff;color:var(--or);}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* ═══════════════════════════════════════
+   SIDEBAR GAUCHE
+═══════════════════════════════════════ */
+.sb{width:280px;min-width:260px;background:var(--sb);border-right:1px solid var(--brd);overflow-y:auto;flex-shrink:0;}
+.sbs{border-bottom:1px solid var(--brd);padding:12px 13px;}
+.sbs h3{color:var(--tx2);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px;}
+.sbs h3 i{color:var(--or);}
+.fg{margin-bottom:9px;}
+.fg label{display:block;color:var(--tx);font-size:11px;font-weight:500;margin-bottom:3px;}
+.fg input,.fg select{width:100%;padding:6px 9px;background:var(--dk);border:1.5px solid #334155;border-radius:6px;color:#fff;font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus{border-color:var(--or);}
+.fg input::placeholder{color:#475569;}
+.cc{font-size:9.5px;color:#64748b;text-align:right;margin-top:2px;}
+.uz{border:2px dashed #334155;border-radius:8px;padding:13px;text-align:center;cursor:pointer;background:var(--dk);position:relative;transition:all .2s;margin-bottom:6px;}
+.uz:hover,.uz.dov{border-color:var(--or);background:rgba(236,102,8,.06);}
+.uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uz-ic{font-size:20px;color:#475569;margin-bottom:4px;}
+.uz-tx{color:var(--tx2);font-size:11px;}
+.uz-sx{color:#475569;font-size:9.5px;margin-top:2px;}
+#qrThumb{width:60px;height:60px;object-fit:contain;border:2px solid var(--or);border-radius:6px;margin:6px auto 0;display:none;}
+.bl{max-height:150px;overflow-y:auto;margin-top:5px;}
+.bi{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:var(--dk);border-radius:5px;margin-bottom:3px;border:1px solid #1e293b;}
+.bi-nm{color:#e2e8f0;font-size:11px;font-weight:600;}
+.bi-cd{color:#94a3b8;font-size:9px;}
+.bi-bb{display:flex;gap:3px;}
+.bib{width:20px;height:20px;border-radius:4px;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.bib-ld{background:rgba(0,92,169,.2);color:#60a5fa;}
+.bib-dl{background:rgba(239,68,68,.2);color:#ef4444;}
+.prog{width:100%;height:4px;background:#1e293b;border-radius:2px;margin:5px 0;display:none;}
+.pf{height:100%;background:var(--or);border-radius:2px;transition:width .3s;}
+
+/* ═══════════════════════════════════════
+   CANVAS CENTER
+═══════════════════════════════════════ */
+.ca{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0a0f1e;}
+.ctb{background:var(--sb);border-bottom:1px solid var(--brd);padding:6px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.tg{display:flex;align-items:center;gap:3px;padding-right:8px;border-right:1px solid var(--brd);}
+.tg:last-child{border:none;}
+.tbtn{width:28px;height:28px;border-radius:5px;border:none;background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.tbtn:hover{background:rgba(236,102,8,.2);color:var(--or);}
+.tbtn.on{background:rgba(236,102,8,.3);color:var(--or);}
+.zv{color:#94a3b8;font-size:11px;font-weight:600;min-width:36px;text-align:center;}
+.cvp{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:28px;}
+
+/* ═══════════════════════════════════════
+   PANNEAU DROITE — Propriétés
+═══════════════════════════════════════ */
+.rp{width:240px;min-width:220px;background:var(--sb);border-left:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;}
+.rph{padding:11px 13px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;}
+.rph h3{color:#e2e8f0;font-size:12px;font-weight:700;}
+.rpb{flex:1;overflow-y:auto;padding:12px 13px;}
+.rpe{color:#475569;font-size:11px;text-align:center;padding-top:28px;line-height:1.9;}
+.rpe i{font-size:22px;color:#334155;display:block;margin-bottom:7px;}
+.prw{margin-bottom:10px;}
+.prw label{display:block;color:var(--tx2);font-size:9.5px;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.prw input,.prw select{width:100%;padding:5px 8px;background:var(--dk);border:1.5px solid #334155;border-radius:5px;color:#fff;font-size:11.5px;font-family:inherit;outline:none;}
+.prw input:focus{border-color:var(--or);}
+.prw input[type=color]{height:30px;padding:2px 3px;cursor:pointer;}
+.prw input[type=range]{padding:0;accent-color:var(--or);}
+.prsep{height:1px;background:var(--brd);margin:9px 0;}
+.prrow{display:flex;gap:5px;}
+.prrow .btn{flex:1;justify-content:center;font-size:10px;padding:5px;}
+.pbadge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9px;font-weight:700;background:rgba(236,102,8,.2);color:var(--or);margin-bottom:8px;}
+
+/* ═══════════════════════════════════════
+   AFFICHE A4 — 794 × 1123 px
+═══════════════════════════════════════ */
+.poster-wrap{transform-origin:top center;}
+.poster{
+  width:794px;height:1123px;
+  background:#EC6608;
+  position:relative;
+  font-family:Arial,sans-serif;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  cursor:default;
+}
+
+/* ── Zone TOP orange ── */
+.p-top{
+  position:absolute;top:0;left:0;right:0;height:175px;
+  background:#EC6608;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+
+/* ── Logo Moov Money ── */
+.p-logo{
+  width:110px;height:110px;
+  cursor:move;position:relative;
+}
+.p-logo svg{width:100%;height:100%;}
+
+/* ── URL ── */
+.p-url{
+  font-family:Arial;font-size:22px;font-weight:900;
+  color:#fff;letter-spacing:.5px;
+  cursor:move;white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,.25);
+  padding:2px 6px;border-radius:4px;
+}
+
+/* ── Carte blanche ── */
+.p-card{
+  position:absolute;left:63px;top:175px;
+  width:668px;height:820px;
+  background:#fff;border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 32px 12px;
+  overflow:visible;
+}
+
+/* ── Nom marchand ── */
+.p-name{
+  font-family:Arial;font-size:40px;font-weight:900;
+  color:#000;text-align:center;text-transform:uppercase;
+  letter-spacing:2px;line-height:1.1;
+  width:100%;margin-bottom:4px;
+  cursor:move;padding:2px;border-radius:3px;
+}
+
+/* ── Label code ── */
+.p-codelabel{
+  font-family:Arial;font-size:24px;font-weight:700;
+  color:#005CA9;text-align:center;margin-bottom:6px;
+  cursor:move;padding:2px;border-radius:3px;
+}
+
+/* ── Boîtes code ── */
+.p-codebox-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:3px;margin-bottom:12px;flex-wrap:nowrap;
+}
+.cbox{
+  display:flex;align-items:center;justify-content:center;
+  border:2.5px solid #000;border-radius:3px;
+  font-family:Arial;font-weight:900;color:#000;background:#fff;
+  flex-shrink:0;
+}
+
+/* ── QR Container ── */
+.p-qr{
+  width:380px;height:380px;
+  border:6px solid #000;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;overflow:hidden;flex-shrink:0;
+  margin-bottom:10px;cursor:move;
+}
+.p-qr img,.p-qr canvas{width:100%;height:100%;object-fit:contain;display:block;}
+
+/* ── Drapeaux CEMAC (CSS only, pas d'images pour éviter tout artefact à l'export) ── */
+.p-flags{
+  display:flex;align-items:stretch;
+  gap:0;width:380px;height:42px;margin-bottom:9px;cursor:move;
+  overflow:hidden;flex-shrink:0;
+}
+.fi{
+  flex:1;display:block;
+  overflow:hidden;
+}
+/* Chaque .fi-* dessine le drapeau en pur CSS, pour que l'écran et l'export soient strictement identiques */
+.fi-ga{
+  /* Gabon : bandes horizontales vert / jaune / bleu */
+  background:
+    linear-gradient(to bottom,
+      #009E60 0 33.33%,
+      #FCD116 33.33% 66.66%,
+      #3A75C4 66.66% 100%);
+}
+.fi-cm{
+  /* Cameroun : bandes verticales vert / rouge / jaune */
+  background:
+    linear-gradient(to right,
+      #007A5E 0 33.33%,
+      #CE1126 33.33% 66.66%,
+      #FCD116 66.66% 100%);
+}
+.fi-gq{
+  /* Guinée Équatoriale : vert / blanc / rouge + triangle bleu à gauche */
+  background:
+    linear-gradient(to bottom,
+      #3E9A00 0 33.33%,
+      #FFFFFF 33.33% 66.66%,
+      #E32118 66.66% 100%),
+    linear-gradient(135deg,
+      #0073CE 0 50%,
+      transparent 50% 100%);
+  background-repeat:no-repeat;
+  background-size:100% 100%, 50% 100%;
+  background-position:0 0, 0 0;
+}
+.fi-cg{
+  /* Congo : diagonale verte / jaune / rouge */
+  background:
+    linear-gradient(135deg,
+      #009A44 0 45%,
+      #F7E017 45% 55%,
+      #DC241F 55% 100%);
+}
+.fi-cf{
+  /* Centrafrique : bleu / blanc / vert / jaune + bande rouge verticale */
+  background:
+    linear-gradient(to bottom,
+      #003082 0 25%,
+      #FFFFFF 25% 50%,
+      #289728 50% 75%,
+      #FFCB00 75% 100%),
+    linear-gradient(to right,
+      transparent 0 40%,
+      #BC0026 40% 60%,
+      transparent 60% 100%);
+  background-repeat:no-repeat;
+  background-size:100% 100%, 100% 100%;
+}
+.fi-td{
+  /* Tchad : bleu / jaune / rouge vertical */
+  background:
+    linear-gradient(to right,
+      #002664 0 33.33%,
+      #FECB00 33.33% 66.66%,
+      #C60C30 66.66% 100%);
+}
+
+/* ── GIMACPAY ── */
+.p-gimacpay{
+  display:flex;align-items:center;justify-content:center;
+  width:277px;height:98px;
+  margin:0 auto 7px auto;
+  cursor:move;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.p-gimacpay img{
+  width:277px;height:98px;
+  object-fit:contain;
+  display:block;
+}
+
+/* ── VOS PAIEMENTS ── */
+.p-vos{
+  font-family:Arial;font-size:18px;font-weight:900;
+  color:#0d0d0d;text-align:center;text-transform:uppercase;
+  letter-spacing:.5px;line-height:1;
+  cursor:move;padding:0;margin:0;border-radius:3px;
+  white-space:nowrap;
+}
+
+/* ── Zone BAS orange ── */
+.p-bot{
+  position:absolute;bottom:0;left:0;right:0;height:128px;
+  background:#EC6608;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 36px;
+}
+.p-cap{
+  background:#fff;border-radius:50px;
+  width:190px;height:78px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:move;overflow:hidden;padding:8px 16px;
+}
+.p-cap img{max-height:58px;max-width:158px;object-fit:contain;}
+.p-cap-txt{font-family:Arial;font-size:13px;font-weight:900;color:#005CA9;display:none;}
+
+/* ═══════════════════════════════════════
+   EDIT HIGHLIGHTS
+═══════════════════════════════════════ */
+.editable{transition:outline .12s,background .12s;}
+.editable:hover{outline:2px dashed rgba(0,92,169,.5);outline-offset:3px;}
+.editable.sel{outline:2.5px solid #005CA9!important;outline-offset:3px;background:rgba(0,92,169,.06)!important;}
+
+/* ═══════════════════════════════════════
+   STATUS
+═══════════════════════════════════════ */
+.stb{background:var(--sb);border-top:1px solid var(--brd);padding:4px 13px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#475569;flex-shrink:0;}
+.sdot{width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:4px;}
+
+/* ═══════════════════════════════════════
+   TOAST & MODAL
+═══════════════════════════════════════ */
+.toast{position:fixed;bottom:16px;right:16px;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9000;transform:translateY(60px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:6px;box-shadow:0 5px 18px rgba(0,0,0,.35);}
+.toast.show{transform:translateY(0);opacity:1;}
+.tok{background:#22c55e;color:#fff;}.twn{background:#f59e0b;color:#fff;}.ter{background:#ef4444;color:#fff;}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:8000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.mov.op{opacity:1;pointer-events:all;}
+.mbox{background:var(--sb);border-radius:12px;padding:22px;width:430px;max-width:95%;border:1px solid var(--brd);box-shadow:0 20px 50px rgba(0,0,0,.5);}
+.mbox h3{color:#fff;font-size:15px;font-weight:700;margin-bottom:12px;}
+.mclose{float:right;background:none;border:none;color:#94a3b8;font-size:15px;cursor:pointer;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--dk);}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
+
+/* PRINT */
+@media print{
+  .hdr,.sb,.rp,.ctb,.stb{display:none!important;}
+  .ca{overflow:visible!important;}
+  .cvp{padding:0!important;}
+  .poster-wrap{transform:none!important;}
+  .poster{box-shadow:none!important;width:210mm!important;height:297mm!important;}
+  .editable{outline:none!important;background:transparent!important;}
+}
+</style>
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar" id="navbar">
-  <div class="nav-brand">
-    <div class="brand-logo">
-      <img src="https://www.genspark.ai/api/files/s/l8H1vXO1" alt="Moov Money" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-      <div class="brand-fallback" style="display:none"><i class="fas fa-qrcode"></i></div>
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="hdr">
+  <div class="hbrand">
+    <span style="font-size:22px;">🖨️</span>
+    <div><h1>QR Poster Studio</h1><span>Moov Money Gabon — v2.3</span></div>
+  </div>
+  <div class="hactions">
+    <button class="btn bgr" onclick="doExportPDF()"><i class="fas fa-file-pdf"></i> PDF 300dpi</button>
+    <button class="btn bbl" onclick="doExportPNG()"><i class="fas fa-image"></i> PNG</button>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside class="sb">
+
+  <div class="sbs">
+    <h3><i class="fas fa-store"></i> Infos Marchand</h3>
+    <div class="fg">
+      <label>Nom du marchand</label>
+      <input id="iName" type="text" placeholder="MEGA MARKET" maxlength="50" oninput="liveName(this)">
+      <div class="cc"><span id="nc">0</span>/50</div>
     </div>
-    <div class="brand-text">
-      <span class="brand-name">QR Poster Studio</span>
-      <span class="brand-sub">Moov Money Gabon · v1.1</span>
+    <div class="fg">
+      <label>Code marchand</label>
+      <input id="iCode" type="text" placeholder="MEGAMARKET" maxlength="20" oninput="liveCode(this)">
+      <div class="cc"><span id="cc2">0</span>/20</div>
+    </div>
+    <button class="btn bbl" style="width:100%;justify-content:center;" onclick="applyMerchant()">
+      <i class="fas fa-check"></i> Appliquer à l'affiche
+    </button>
+  </div>
+
+  <div class="sbs">
+    <h3><i class="fas fa-qrcode"></i> QR Code</h3>
+    <div class="fg">
+      <label>Contenu QR (URL/texte)</label>
+      <input id="iQrTxt" type="text" placeholder="https://pay.moovmoney.ga/..." oninput="refreshQR()">
+    </div>
+    <div class="fg">
+      <label>Importer QR (PNG / JPG / PDF)</label>
+      <div class="uz" id="qrZone"
+           ondragover="event.preventDefault();this.classList.add('dov')"
+           ondragleave="this.classList.remove('dov')"
+           ondrop="dropQR(event)">
+        <input type="file" id="qrFile" accept="image/*,.pdf" onchange="fileQR(event)">
+        <div class="uz-ic">📷</div>
+        <div class="uz-tx">Glisser / cliquer</div>
+        <div class="uz-sx">PNG · JPG · <strong style="color:var(--or)">PDF</strong></div>
+      </div>
+      <img id="qrThumb" alt="QR preview">
+    </div>
+    <button id="btnClearQR" class="btn bgy" style="width:100%;justify-content:center;font-size:10.5px;display:none;" onclick="clearQR()">
+      <i class="fas fa-times"></i> Effacer QR importé
+    </button>
+  </div>
+
+  <div class="sbs">
+    <h3><i class="fas fa-download"></i> Export</h3>
+    <div class="fg">
+      <label>Format</label>
+      <select id="eFmt"><option value="A4">A4 (210×297 mm)</option><option value="A5">A5 (148×210 mm)</option></select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <button class="btn bgr" style="justify-content:center;" onclick="doExportPDF()"><i class="fas fa-file-pdf"></i> Export PDF 300 DPI</button>
+      <button class="btn bbl" style="justify-content:center;" onclick="doExportPNG()"><i class="fas fa-image"></i> Export PNG 300 DPI</button>
     </div>
   </div>
-  <div class="nav-links">
-    <a href="#overview" class="nav-link active">Vue d'ensemble</a>
-    <a href="#architecture" class="nav-link">Architecture</a>
-    <a href="#modules" class="nav-link">Modules</a>
-    <a href="#roadmap" class="nav-link">Roadmap</a>
-    <a href="#data" class="nav-link">Data</a>
-    <a href="#tech" class="nav-link">Stack</a>
-    <a href="template-preview.html" class="nav-link" style="background:var(--moov-orange);color:white;margin-left:0.5rem;" target="_blank"><i class="fas fa-eye"></i> Aperçu Affiche</a>
-  </div>
-  <div class="nav-badge">
-    <span class="badge-offline"><i class="fas fa-wifi-slash"></i> 100% Offline</span>
-    <span class="badge-win"><i class="fab fa-windows"></i> Win 11</span>
-  </div>
-</nav>
 
-<!-- HERO -->
-<section class="hero" id="overview">
-  <div class="hero-bg">
-    <div class="hero-grid"></div>
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
-  </div>
-  <div class="hero-content">
-    <div class="hero-tags">
-      <span class="tag tag-electron"><i class="fas fa-atom"></i> Electron 31</span>
-      <span class="tag tag-konva"><i class="fas fa-layer-group"></i> Konva.js</span>
-      <span class="tag tag-pdf"><i class="fas fa-file-pdf"></i> PDF 300 DPI</span>
-      <span class="tag tag-offline"><i class="fas fa-shield-alt"></i> Offline First</span>
-    </div>
-    <h1 class="hero-title">
-      <span class="hero-title-main">QR Poster Studio</span>
-      <span class="hero-title-accent">Architecture & Roadmap</span>
-    </h1>
-    <p class="hero-desc">
-      Application desktop Windows 11 pour la génération industrielle d'affiches marchands QR Code.<br/>
-      Éditeur WYSIWYG · Import CSV/Excel · Export PDF print-ready · Mode 100% offline.
-    </p>
-    <div class="hero-kpis">
-      <div class="kpi-card">
-        <div class="kpi-icon"><i class="fas fa-bolt"></i></div>
-        <div class="kpi-value">&lt; 30s</div>
-        <div class="kpi-label">Génération / affiche</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon"><i class="fas fa-images"></i></div>
-        <div class="kpi-value">500+</div>
-        <div class="kpi-label">Affiches batch / session</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon"><i class="fas fa-print"></i></div>
-        <div class="kpi-value">300 DPI</div>
-        <div class="kpi-label">Qualité impression</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon"><i class="fas fa-language"></i></div>
-        <div class="kpi-value">FR / EN</div>
-        <div class="kpi-label">Interface bilingue</div>
-      </div>
-    </div>
-    <div class="hero-cta">
-      <a href="#architecture" class="btn btn-primary"><i class="fas fa-sitemap"></i> Voir l'architecture</a>
-      <a href="#roadmap" class="btn btn-secondary"><i class="fas fa-road"></i> Voir la roadmap</a>
-    </div>
-  </div>
-</section>
-
-<!-- CONTEXT BANNER -->
-<section class="context-banner">
-  <div class="container">
-    <div class="context-grid">
-      <div class="context-item">
-        <i class="fas fa-exclamation-triangle"></i>
-        <div>
-          <strong>Problème actuel</strong>
-          <p>Production manuelle via PowerPoint : 5–10 min/affiche, incohérences visuelles, coûts récurrents</p>
-        </div>
-      </div>
-      <div class="context-arrow"><i class="fas fa-arrow-right"></i></div>
-      <div class="context-item context-item-solution">
-        <i class="fas fa-check-circle"></i>
-        <div>
-          <strong>Solution cible</strong>
-          <p>Génération automatisée &lt;30s/affiche, standardisation visuelle parfaite, zéro coût récurrent</p>
-        </div>
-      </div>
-      <div class="context-arrow"><i class="fas fa-arrow-right"></i></div>
-      <div class="context-item">
-        <i class="fas fa-chart-line"></i>
-        <div>
-          <strong>Impact business</strong>
-          <p>ROI immédiat · Déploiement réseau 1000+ marchands · Cohérence brand MOOV Money</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ARCHITECTURE SECTION -->
-<section class="section" id="architecture">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Architecture Technique</span>
-      <h2 class="section-title">Structure du Projet</h2>
-      <p class="section-desc">Architecture Electron multi-processus avec séparation Main / Renderer / Preload et modules fonctionnels indépendants.</p>
-    </div>
-
-    <!-- FILE TREE -->
-    <div class="arch-layout">
-      <div class="arch-tree-panel">
-        <div class="panel-header">
-          <i class="fas fa-folder-tree"></i>
-          <span>Arborescence du projet</span>
-          <span class="panel-badge">Electron 31 + Konva.js</span>
-        </div>
-        <div class="file-tree">
-          <div class="tree-root">
-            <div class="tree-item tree-folder tree-root-item" data-tooltip="Racine du projet">
-              <i class="fas fa-folder-open"></i>
-              <span class="tree-name">qr-poster-studio/</span>
-            </div>
-
-            <div class="tree-group">
-              <div class="tree-item tree-folder" data-highlight="main">
-                <i class="fas fa-folder-open text-blue"></i>
-                <span>src/</span>
-              </div>
-
-              <div class="tree-sub">
-                <div class="tree-item tree-folder" data-highlight="main">
-                  <i class="fas fa-folder text-orange"></i>
-                  <span>main/</span>
-                  <span class="tree-tag tag-main">Main Process</span>
-                </div>
-                <div class="tree-sub tree-sub-2">
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>main.js</span><em>Entry point Electron</em></div>
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>preload.js</span><em>Bridge IPC sécurisé</em></div>
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>ipc-handlers.js</span><em>Handlers IPC (fs, pdf, csv)</em></div>
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>menu.js</span><em>Menu natif Windows</em></div>
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>auto-updater.js</span><em>Mise à jour offline</em></div>
-                  <div class="tree-item tree-folder">
-                    <i class="fas fa-folder text-blue"></i><span>services/</span>
-                  </div>
-                  <div class="tree-sub tree-sub-3">
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>pdf-service.js</span><em>pdfkit + sharp 300DPI</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>qr-extractor.js</span><em>pdf2pic + jimp</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>csv-parser.js</span><em>PapaParse + xlsx</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>image-processor.js</span><em>Sharp resize/crop</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>store-service.js</span><em>electron-store (SQLite)</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>template-service.js</span><em>Gestion templates JSON</em></div>
-                  </div>
-                </div>
-
-                <div class="tree-item tree-folder" data-highlight="renderer">
-                  <i class="fas fa-folder text-purple"></i>
-                  <span>renderer/</span>
-                  <span class="tree-tag tag-renderer">Renderer Process</span>
-                </div>
-                <div class="tree-sub tree-sub-2">
-                  <div class="tree-item tree-file"><i class="fab fa-html5 text-red"></i><span>index.html</span><em>Shell HTML principal</em></div>
-                  <div class="tree-item tree-folder"><i class="fas fa-folder text-blue"></i><span>app/</span></div>
-                  <div class="tree-sub tree-sub-3">
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>app.js</span><em>Init + Router</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>store.js</span><em>Zustand state management</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>i18n.js</span><em>Traductions FR/EN</em></div>
-                  </div>
-                  <div class="tree-item tree-folder"><i class="fas fa-folder text-blue"></i><span>components/</span></div>
-                  <div class="tree-sub tree-sub-3">
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>Editor.js</span><em>Canvas Konva.js WYSIWYG</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>Toolbar.js</span><em>Outils + raccourcis clavier</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>LayerPanel.js</span><em>Panneau calques</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>PropertiesPanel.js</span><em>Propriétés objet sélectionné</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>TemplateSelector.js</span><em>Galerie templates</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>ImportPanel.js</span><em>CSV/Excel/QR import</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>BatchPanel.js</span><em>Génération en masse</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>ExportModal.js</span><em>Options export PDF/PNG</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>SettingsPanel.js</span><em>Préférences app</em></div>
-                  </div>
-                  <div class="tree-item tree-folder"><i class="fas fa-folder text-blue"></i><span>styles/</span></div>
-                  <div class="tree-sub tree-sub-3">
-                    <div class="tree-item tree-file"><i class="fab fa-css3 text-blue"></i><span>main.css</span><em>Styles globaux</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-css3 text-blue"></i><span>editor.css</span><em>Canvas + panneaux</em></div>
-                    <div class="tree-item tree-file"><i class="fab fa-css3 text-blue"></i><span>tokens.css</span><em>Design tokens Moov Money</em></div>
-                  </div>
-                </div>
-
-                <div class="tree-item tree-folder">
-                  <i class="fas fa-folder text-green"></i><span>shared/</span>
-                  <span class="tree-tag tag-shared">Partagé</span>
-                </div>
-                <div class="tree-sub tree-sub-2">
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>constants.js</span><em>Couleurs, tailles, configs</em></div>
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>validators.js</span><em>Validation données marchand</em></div>
-                  <div class="tree-item tree-file"><i class="fab fa-js text-yellow"></i><span>utils.js</span><em>Helpers communs</em></div>
-                </div>
-              </div>
-
-              <div class="tree-item tree-folder">
-                <i class="fas fa-folder text-green"></i><span>assets/</span>
-              </div>
-              <div class="tree-sub">
-                <div class="tree-item tree-file"><i class="fas fa-image text-blue"></i><span>logos/</span><em>Moov Money, GimacPay, maDIGIPRIE…</em></div>
-                <div class="tree-item tree-file"><i class="fas fa-palette text-purple"></i><span>templates/</span><em>JSON templates A4/A5</em></div>
-                <div class="tree-item tree-file"><i class="fas fa-font text-gray"></i><span>fonts/</span><em>Polices embarquées</em></div>
-                <div class="tree-item tree-file"><i class="fas fa-icons text-orange"></i><span>icons/</span><em>App icons Windows</em></div>
-              </div>
-
-              <div class="tree-item tree-folder">
-                <i class="fas fa-folder text-red"></i><span>data/</span>
-              </div>
-              <div class="tree-sub">
-                <div class="tree-item tree-file"><i class="fas fa-database text-blue"></i><span>db.sqlite</span><em>electron-store / better-sqlite3</em></div>
-                <div class="tree-item tree-file"><i class="fas fa-file-code text-green"></i><span>templates.json</span><em>Templates pré-définis</em></div>
-                <div class="tree-item tree-file"><i class="fas fa-file-csv text-green"></i><span>sample-merchants.csv</span><em>Données test</em></div>
-              </div>
-
-              <div class="tree-item tree-file"><i class="fas fa-cog text-gray"></i><span>package.json</span></div>
-              <div class="tree-item tree-file"><i class="fas fa-box text-orange"></i><span>electron-builder.yml</span><em>Config build .exe/.msi</em></div>
-              <div class="tree-item tree-file"><i class="fas fa-file-code text-blue"></i><span>webpack.config.js</span><em>Bundling renderer</em></div>
-              <div class="tree-item tree-file"><i class="fas fa-shield-alt text-green"></i><span>.env.example</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PROCESS DIAGRAM -->
-      <div class="arch-diagram-panel">
-        <div class="panel-header">
-          <i class="fas fa-diagram-project"></i>
-          <span>Flux Multi-Processus Electron</span>
-        </div>
-        <div class="process-diagram">
-
-          <div class="process-box process-main">
-            <div class="process-header">
-              <i class="fas fa-microchip"></i>
-              <span>Main Process (Node.js)</span>
-              <span class="process-badge">Privilégié</span>
-            </div>
-            <div class="process-services">
-              <div class="service-item"><i class="fas fa-file-pdf"></i> PDF Service (pdfkit)</div>
-              <div class="service-item"><i class="fas fa-qrcode"></i> QR Extractor (pdf2pic)</div>
-              <div class="service-item"><i class="fas fa-table"></i> CSV/Excel Parser</div>
-              <div class="service-item"><i class="fas fa-image"></i> Image Processor (sharp)</div>
-              <div class="service-item"><i class="fas fa-database"></i> Store (SQLite)</div>
-              <div class="service-item"><i class="fas fa-folder"></i> File System (Node fs)</div>
-            </div>
-          </div>
-
-          <div class="process-ipc">
-            <div class="ipc-arrow">
-              <div class="ipc-line"></div>
-              <div class="ipc-label">IPC Sécurisé<br/><code>contextBridge</code></div>
-              <div class="ipc-line"></div>
-            </div>
-            <div class="ipc-channels">
-              <span>pdf:export</span>
-              <span>csv:parse</span>
-              <span>qr:extract</span>
-              <span>file:save</span>
-              <span>template:load</span>
-            </div>
-          </div>
-
-          <div class="process-box process-renderer">
-            <div class="process-header">
-              <i class="fas fa-display"></i>
-              <span>Renderer Process (Chromium)</span>
-              <span class="process-badge process-badge-renderer">Sandboxé</span>
-            </div>
-            <div class="process-services">
-              <div class="service-item"><i class="fas fa-vector-square"></i> Konva.js Canvas (WYSIWYG)</div>
-              <div class="service-item"><i class="fas fa-layer-group"></i> Layer Manager</div>
-              <div class="service-item"><i class="fas fa-undo"></i> Undo/Redo Stack</div>
-              <div class="service-item"><i class="fas fa-th-large"></i> Template Engine</div>
-              <div class="service-item"><i class="fas fa-file-import"></i> Import UI</div>
-              <div class="service-item"><i class="fas fa-file-export"></i> Export UI</div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- UI LAYOUT WIREFRAME -->
-        <div class="panel-header" style="margin-top: 2rem;">
-          <i class="fas fa-window-maximize"></i>
-          <span>Layout UI — Fenêtre principale</span>
-        </div>
-        <div class="ui-wireframe">
-          <div class="wire-titlebar">
-            <div class="wire-title-left"><span class="wire-logo">M</span> QR Poster Studio — Moov Money Gabon</div>
-            <div class="wire-title-right">
-              <span class="wire-winbtn wire-min">─</span>
-              <span class="wire-winbtn wire-max">□</span>
-              <span class="wire-winbtn wire-close">✕</span>
-            </div>
-          </div>
-          <div class="wire-menu">
-            <span>Fichier</span><span>Édition</span><span>Affichage</span><span>Outils</span><span>Aide</span>
-            <span class="wire-lang">🌐 FR</span>
-          </div>
-          <div class="wire-toolbar">
-            <div class="wire-tool-group">
-              <span class="wire-tool active"><i class="fas fa-arrow-pointer"></i></span>
-              <span class="wire-tool"><i class="fas fa-text-width"></i></span>
-              <span class="wire-tool"><i class="fas fa-image"></i></span>
-              <span class="wire-tool"><i class="fas fa-shapes"></i></span>
-              <span class="wire-tool"><i class="fas fa-qrcode"></i></span>
-            </div>
-            <div class="wire-tool-sep"></div>
-            <div class="wire-tool-group">
-              <span class="wire-tool"><i class="fas fa-undo"></i></span>
-              <span class="wire-tool"><i class="fas fa-redo"></i></span>
-            </div>
-            <div class="wire-tool-sep"></div>
-            <div class="wire-tool-group">
-              <span class="wire-tool wire-zoom"><i class="fas fa-magnifying-glass-plus"></i> 100%</span>
-              <span class="wire-tool"><i class="fas fa-expand"></i></span>
-            </div>
-            <div class="wire-spacer"></div>
-            <div class="wire-tool-group">
-              <span class="wire-tool wire-btn-preview"><i class="fas fa-eye"></i> Aperçu</span>
-              <span class="wire-tool wire-btn-export"><i class="fas fa-file-pdf"></i> Générer PDF A4</span>
-            </div>
-          </div>
-          <div class="wire-body">
-            <div class="wire-sidebar wire-sidebar-left">
-              <div class="wire-tab active">Templates</div>
-              <div class="wire-tab">Import</div>
-              <div class="wire-tab">Médias</div>
-              <div class="wire-sidebar-content">
-                <div class="wire-template-thumb">A4 Standard</div>
-                <div class="wire-template-thumb">A5 Compact</div>
-                <div class="wire-template-thumb">+ Nouveau</div>
-              </div>
-            </div>
-            <div class="wire-canvas-area">
-              <div class="wire-canvas">
-                <div class="wire-canvas-header-zone">
-                  <div class="wire-zone wire-zone-logo">LOGO MOOV</div>
-                  <div class="wire-zone wire-zone-partner">PARTENAIRES</div>
-                </div>
-                <div class="wire-canvas-mid">
-                  <div class="wire-zone wire-zone-merchant">NOM MARCHAND</div>
-                  <div class="wire-zone wire-zone-qr">QR CODE</div>
-                </div>
-                <div class="wire-canvas-footer">
-                  <div class="wire-zone wire-zone-cta">SCANNEZ & PAYEZ</div>
-                </div>
-              </div>
-              <div class="wire-ruler-h"></div>
-              <div class="wire-ruler-v"></div>
-            </div>
-            <div class="wire-sidebar wire-sidebar-right">
-              <div class="wire-tab active">Calques</div>
-              <div class="wire-tab">Propriétés</div>
-              <div class="wire-layers">
-                <div class="wire-layer wire-layer-active"><i class="fas fa-qrcode"></i> QR Code</div>
-                <div class="wire-layer"><i class="fas fa-font"></i> Nom marchand</div>
-                <div class="wire-layer"><i class="fas fa-image"></i> Logo Moov</div>
-                <div class="wire-layer"><i class="fas fa-image"></i> BG dégradé</div>
-              </div>
-              <div class="wire-props">
-                <div class="wire-prop">X: <input type="text" value="120" /></div>
-                <div class="wire-prop">Y: <input type="text" value="340" /></div>
-                <div class="wire-prop">W: <input type="text" value="200" /></div>
-                <div class="wire-prop">H: <input type="text" value="200" /></div>
-                <div class="wire-prop">Rot: <input type="text" value="0°" /></div>
-              </div>
-            </div>
-          </div>
-          <div class="wire-statusbar">
-            <span><i class="fas fa-wifi-slash"></i> Mode Offline ✓</span>
-            <span>A4 · 2480 × 3508 px · 300 DPI</span>
-            <span>1 calque sélectionné</span>
-            <span>Zoom : 100%</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- MODULES SECTION -->
-<section class="section section-alt" id="modules">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Modules Fonctionnels</span>
-      <h2 class="section-title">Composants Clés</h2>
-      <p class="section-desc">Découpage en 8 modules indépendants pour une maintenabilité maximale.</p>
-    </div>
-    <div class="modules-grid">
-
-      <div class="module-card module-editor">
-        <div class="module-icon"><i class="fas fa-vector-square"></i></div>
-        <div class="module-num">M1</div>
-        <h3>Éditeur WYSIWYG</h3>
-        <p>Canvas Konva.js avec couches, transformation libre, snap magnétique, alignement, grille.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> Drag & Drop natif</li>
-          <li><i class="fas fa-check"></i> Resize + Rotation libre</li>
-          <li><i class="fas fa-check"></i> Snap magnétique ±5px</li>
-          <li><i class="fas fa-check"></i> Grille configurable</li>
-          <li><i class="fas fa-check"></i> Multi-sélection (Shift+clic)</li>
-          <li><i class="fas fa-check"></i> Lock/Unlock calque</li>
-          <li><i class="fas fa-check"></i> Undo/Redo (Ctrl+Z/Y, 50 états)</li>
-        </ul>
-        <div class="module-tech"><span>Konva.js 9</span><span>Transformer API</span></div>
-      </div>
-
-      <div class="module-card module-template">
-        <div class="module-icon"><i class="fas fa-th-large"></i></div>
-        <div class="module-num">M2</div>
-        <h3>Templates</h3>
-        <p>Système de templates JSON sérialisés, galerie visuelle, duplication, export/import.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> Templates A4 (2480×3508 px)</li>
-          <li><i class="fas fa-check"></i> Templates A5 (1748×2480 px)</li>
-          <li><i class="fas fa-check"></i> Sérialisation JSON Konva</li>
-          <li><i class="fas fa-check"></i> Miniatures preview live</li>
-          <li><i class="fas fa-check"></i> Templates custom sauvegardables</li>
-          <li><i class="fas fa-check"></i> Champs liés ({{nom}}, {{code}})</li>
-        </ul>
-        <div class="module-tech"><span>JSON Schema</span><span>electron-store</span></div>
-      </div>
-
-      <div class="module-card module-import">
-        <div class="module-icon"><i class="fas fa-file-import"></i></div>
-        <div class="module-num">M3</div>
-        <h3>Import Données</h3>
-        <p>Ingestion CSV/Excel avec mapping colonnes, validation, prévisualisation avant import.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> CSV UTF-8 + séparateur auto</li>
-          <li><i class="fas fa-check"></i> Excel .xlsx / .xls</li>
-          <li><i class="fas fa-check"></i> Mapping colonnes drag & drop</li>
-          <li><i class="fas fa-check"></i> Validation regex (code marchand)</li>
-          <li><i class="fas fa-check"></i> Préview tableau 10 lignes</li>
-          <li><i class="fas fa-check"></i> Ajout individuel formulaire</li>
-          <li><i class="fas fa-check"></i> Historique imports</li>
-        </ul>
-        <div class="module-tech"><span>PapaParse</span><span>SheetJS (xlsx)</span></div>
-      </div>
-
-      <div class="module-card module-qr">
-        <div class="module-icon"><i class="fas fa-qrcode"></i></div>
-        <div class="module-num">M4</div>
-        <h3>Gestion QR Codes</h3>
-        <p>Import dossier PDF/PNG, extraction automatique depuis PDF, recadrage intelligent.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> Import dossier QR (PDF ou PNG)</li>
-          <li><i class="fas fa-check"></i> Extraction PDF → PNG (pdf2pic)</li>
-          <li><i class="fas fa-check"></i> Recadrage automatique (sharp)</li>
-          <li><i class="fas fa-check"></i> Association nom fichier ↔ code</li>
-          <li><i class="fas fa-check"></i> Préview QR inline canvas</li>
-          <li><i class="fas fa-check"></i> Fallback QR manquant (placeholder)</li>
-        </ul>
-        <div class="module-tech"><span>pdf2pic</span><span>sharp</span><span>jimp</span></div>
-      </div>
-
-      <div class="module-card module-export">
-        <div class="module-icon"><i class="fas fa-file-export"></i></div>
-        <div class="module-num">M5</div>
-        <h3>Export Print-Ready</h3>
-        <p>Export PDF A4/A5 à 300 DPI fidèle au rendu canvas, PNG haute résolution.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> PNG 300 DPI (2480×3508)</li>
-          <li><i class="fas fa-check"></i> PDF print-ready (pdfkit)</li>
-          <li><i class="fas fa-check"></i> PDF multi-pages (batch)</li>
-          <li><i class="fas fa-check"></i> Nommage auto (code_marchand)</li>
-          <li><i class="fas fa-check"></i> Dossier sortie configurable</li>
-          <li><i class="fas fa-check"></i> Barre progression batch</li>
-          <li><i class="fas fa-check"></i> Log export JSON</li>
-        </ul>
-        <div class="module-tech"><span>pdfkit</span><span>sharp</span><span>canvas API</span></div>
-      </div>
-
-      <div class="module-card module-batch">
-        <div class="module-icon"><i class="fas fa-layer-group"></i></div>
-        <div class="module-num">M6</div>
-        <h3>Génération Batch</h3>
-        <p>Génération automatisée en masse à partir d'une liste marchands + dossier QR.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> Queue processing asynchrone</li>
-          <li><i class="fas fa-check"></i> Parallélisation (Worker Threads)</li>
-          <li><i class="fas fa-check"></i> Progression en temps réel</li>
-          <li><i class="fas fa-check"></i> Reprise sur erreur</li>
-          <li><i class="fas fa-check"></i> Rapport CSV post-génération</li>
-          <li><i class="fas fa-check"></i> 500+ affiches / session</li>
-        </ul>
-        <div class="module-tech"><span>Worker Threads</span><span>Node.js streams</span></div>
-      </div>
-
-      <div class="module-card module-i18n">
-        <div class="module-icon"><i class="fas fa-language"></i></div>
-        <div class="module-num">M7</div>
-        <h3>Internationalisation</h3>
-        <p>Interface bilingue FR/EN avec switch dynamique sans redémarrage.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> Fichiers i18n JSON</li>
-          <li><i class="fas fa-check"></i> Switch FR ↔ EN en live</li>
-          <li><i class="fas fa-check"></i> Persistance préférence langue</li>
-          <li><i class="fas fa-check"></i> Pluralisation</li>
-          <li><i class="fas fa-check"></i> Messages d'erreur traduits</li>
-        </ul>
-        <div class="module-tech"><span>i18next</span><span>electron-store</span></div>
-      </div>
-
-      <div class="module-card module-settings">
-        <div class="module-icon"><i class="fas fa-cog"></i></div>
-        <div class="module-num">M8</div>
-        <h3>Paramètres & Sécurité</h3>
-        <p>Préférences persistantes, chemins par défaut, validation données, logs d'activité.</p>
-        <ul class="module-features">
-          <li><i class="fas fa-check"></i> Dossier export par défaut</li>
-          <li><i class="fas fa-check"></i> Thème (clair/sombre)</li>
-          <li><i class="fas fa-check"></i> Unités (px/mm/cm)</li>
-          <li><i class="fas fa-check"></i> Logs activité (electron-log)</li>
-          <li><i class="fas fa-check"></i> Export/Import paramètres</li>
-          <li><i class="fas fa-check"></i> Validation code marchand</li>
-        </ul>
-        <div class="module-tech"><span>electron-store</span><span>electron-log</span></div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ROADMAP SECTION -->
-<section class="section" id="roadmap">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Roadmap</span>
-      <h2 class="section-title">MVP → V1 → V2</h2>
-      <p class="section-desc">Découpage en 3 phases pour une livraison rapide et itérative.</p>
-    </div>
-
-    <div class="roadmap-timeline">
-
-      <!-- PHASE MVP -->
-      <div class="phase-block phase-mvp">
-        <div class="phase-header">
-          <div class="phase-badge phase-badge-mvp">MVP</div>
-          <div class="phase-info">
-            <h3>Phase 0 · MVP Fonctionnel</h3>
-            <div class="phase-meta">
-              <span><i class="fas fa-calendar"></i> Semaines 1–4</span>
-              <span><i class="fas fa-clock"></i> ~4 semaines</span>
-              <span><i class="fas fa-bullseye"></i> Prêt pour tests terrain</span>
-            </div>
-          </div>
-          <div class="phase-progress">
-            <div class="progress-ring">
-              <svg viewBox="0 0 60 60">
-                <circle cx="30" cy="30" r="25" class="progress-bg"/>
-                <circle cx="30" cy="30" r="25" class="progress-fill progress-0" style="stroke-dashoffset: calc(157 - 157 * 0.0)"/>
-              </svg>
-              <span>0%</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="sprints-grid">
-          <div class="sprint-card">
-            <div class="sprint-header">
-              <span class="sprint-num">S1</span>
-              <span class="sprint-title">Scaffolding & Setup</span>
-              <span class="sprint-days">5j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Init projet Electron 31 + Webpack</span></li>
-              <li class="task-todo"><span>Structure dossiers src/main + renderer</span></li>
-              <li class="task-todo"><span>Preload.js + contextBridge sécurisé</span></li>
-              <li class="task-todo"><span>Intégration Konva.js dans renderer</span></li>
-              <li class="task-todo"><span>Layout UI de base (3 panneaux)</span></li>
-              <li class="task-todo"><span>Electron-builder config (.exe NSIS)</span></li>
-              <li class="task-todo"><span>Design tokens Moov Money (couleurs, fonts)</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card">
-            <div class="sprint-header">
-              <span class="sprint-num">S2</span>
-              <span class="sprint-title">Canvas & Calques</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Canvas Konva.js A4 (2480×3508)</span></li>
-              <li class="task-todo"><span>Stage + Layer multi-calques</span></li>
-              <li class="task-todo"><span>Transformer : drag, resize, rotation</span></li>
-              <li class="task-todo"><span>Snap magnétique ±5px</span></li>
-              <li class="task-todo"><span>Panneau calques (ordre, visibility, lock)</span></li>
-              <li class="task-todo"><span>Undo/Redo stack (50 états)</span></li>
-              <li class="task-todo"><span>Zoom + pan canvas</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card">
-            <div class="sprint-header">
-              <span class="sprint-num">S3</span>
-              <span class="sprint-title">Template de base + QR</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Template JSON A4 standard Moov Money</span></li>
-              <li class="task-todo"><span>Champs variables {{nom}}, {{code}}, {{adresse}}</span></li>
-              <li class="task-todo"><span>Import dossier QR PNG/PDF via dialog</span></li>
-              <li class="task-todo"><span>Extraction PDF → PNG (pdf2pic)</span></li>
-              <li class="task-todo"><span>Recadrage auto QR (sharp/jimp)</span></li>
-              <li class="task-todo"><span>Association QR ↔ code marchand</span></li>
-              <li class="task-todo"><span>Placement QR sur canvas</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card">
-            <div class="sprint-header">
-              <span class="sprint-num">S4</span>
-              <span class="sprint-title">Import CSV + Export PDF</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Parser CSV (PapaParse) + Excel (SheetJS)</span></li>
-              <li class="task-todo"><span>Mapping colonnes → champs template</span></li>
-              <li class="task-todo"><span>Validation données (regex code marchand)</span></li>
-              <li class="task-todo"><span>Export PNG 300 DPI (canvas → sharp)</span></li>
-              <li class="task-todo"><span>Export PDF A4 print-ready (pdfkit)</span></li>
-              <li class="task-todo"><span>Génération batch basique (séquentielle)</span></li>
-              <li class="task-todo"><span>Barre progression + notifications</span></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="phase-deliverables">
-          <div class="deliverable-title"><i class="fas fa-box-open"></i> Livrables MVP</div>
-          <div class="deliverables-list">
-            <span class="deliverable"><i class="fas fa-file-archive"></i> qr-poster-studio-mvp-setup.exe</span>
-            <span class="deliverable"><i class="fas fa-file-code"></i> Template A4 Moov Money</span>
-            <span class="deliverable"><i class="fas fa-file-csv"></i> Guide utilisateur PDF</span>
-            <span class="deliverable"><i class="fas fa-vial"></i> Rapport test terrain (5 marchands)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- PHASE V1 -->
-      <div class="phase-connector">
-        <div class="connector-line"></div>
-        <div class="connector-badge"><i class="fas fa-arrow-down"></i></div>
-        <div class="connector-line"></div>
-      </div>
-
-      <div class="phase-block phase-v1">
-        <div class="phase-header">
-          <div class="phase-badge phase-badge-v1">V1.0</div>
-          <div class="phase-info">
-            <h3>Phase 1 · Version Production</h3>
-            <div class="phase-meta">
-              <span><i class="fas fa-calendar"></i> Semaines 5–10</span>
-              <span><i class="fas fa-clock"></i> ~6 semaines</span>
-              <span><i class="fas fa-bullseye"></i> Déploiement réseau marchands</span>
-            </div>
-          </div>
-          <div class="phase-progress">
-            <div class="progress-ring">
-              <svg viewBox="0 0 60 60">
-                <circle cx="30" cy="30" r="25" class="progress-bg"/>
-                <circle cx="30" cy="30" r="25" class="progress-fill progress-v1" style="stroke-dashoffset: calc(157 - 157 * 0.0)"/>
-              </svg>
-              <span>0%</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="sprints-grid">
-          <div class="sprint-card sprint-v1">
-            <div class="sprint-header">
-              <span class="sprint-num sprint-num-v1">S5</span>
-              <span class="sprint-title">Éditeur avancé</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Multi-sélection + alignement (H/V)</span></li>
-              <li class="task-todo"><span>Distribution équitable objets</span></li>
-              <li class="task-todo"><span>Copy/Paste/Duplicate calques</span></li>
-              <li class="task-todo"><span>Groupe d'objets (Group/Ungroup)</span></li>
-              <li class="task-todo"><span>Raccourcis clavier complets</span></li>
-              <li class="task-todo"><span>Règles + guides (drag depuis règle)</span></li>
-              <li class="task-todo"><span>Mode sélection rectangle</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card sprint-v1">
-            <div class="sprint-header">
-              <span class="sprint-num sprint-num-v1">S6</span>
-              <span class="sprint-title">Templates multiples</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Galerie templates (A4, A5, portrait, paysage)</span></li>
-              <li class="task-todo"><span>Template « Moov Money Standard »</span></li>
-              <li class="task-todo"><span>Template « GimacPay Edition »</span></li>
-              <li class="task-todo"><span>Template « maDIGIPRIE »</span></li>
-              <li class="task-todo"><span>Sauvegarde template custom</span></li>
-              <li class="task-todo"><span>Export/Import template (.json)</span></li>
-              <li class="task-todo"><span>Miniatures auto-générées</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card sprint-v1">
-            <div class="sprint-header">
-              <span class="sprint-num sprint-num-v1">S7</span>
-              <span class="sprint-title">Batch avancé</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Worker Threads (parallélisation x4)</span></li>
-              <li class="task-todo"><span>Reprise sur erreur (skip + log)</span></li>
-              <li class="task-todo"><span>Préview batch avant génération</span></li>
-              <li class="task-todo"><span>Rapport CSV détaillé post-batch</span></li>
-              <li class="task-todo"><span>Nommage fichiers configurable</span></li>
-              <li class="task-todo"><span>PDF multi-pages (1 fichier pour tout)</span></li>
-              <li class="task-todo"><span>Estimation temps restant</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card sprint-v1">
-            <div class="sprint-header">
-              <span class="sprint-num sprint-num-v1">S8</span>
-              <span class="sprint-title">UX / Polissage</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Interface bilingue FR/EN complète</span></li>
-              <li class="task-todo"><span>Thème sombre / clair</span></li>
-              <li class="task-todo"><span>Onboarding wizard (1ère ouverture)</span></li>
-              <li class="task-todo"><span>Aide contextuelle (tooltips)</span></li>
-              <li class="task-todo"><span>Menu natif Windows 11 complet</span></li>
-              <li class="task-todo"><span>Raccourcis clavier (aide intégrée)</span></li>
-              <li class="task-todo"><span>Notifications Windows toast</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card sprint-v1">
-            <div class="sprint-header">
-              <span class="sprint-num sprint-num-v1">S9</span>
-              <span class="sprint-title">Qualité & Tests</span>
-              <span class="sprint-days">7j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Tests unitaires (Jest) services</span></li>
-              <li class="task-todo"><span>Tests E2E (Playwright) workflows clés</span></li>
-              <li class="task-todo"><span>Tests qualité PDF (DPI, couleurs)</span></li>
-              <li class="task-todo"><span>Rapport de performance (génération 100 affiches)</span></li>
-              <li class="task-todo"><span>Audit accessibilité UI</span></li>
-              <li class="task-todo"><span>Fix bugs critiques</span></li>
-            </ul>
-          </div>
-
-          <div class="sprint-card sprint-v1">
-            <div class="sprint-header">
-              <span class="sprint-num sprint-num-v1">S10</span>
-              <span class="sprint-title">Packaging & Deploy</span>
-              <span class="sprint-days">5j</span>
-            </div>
-            <ul class="sprint-tasks">
-              <li class="task-todo"><span>Build NSIS installer (.exe signé)</span></li>
-              <li class="task-todo"><span>Build MSI (déploiement IT centralisé)</span></li>
-              <li class="task-todo"><span>Code signing certificat Windows</span></li>
-              <li class="task-todo"><span>Assets embarqués (fonts, logos, templates)</span></li>
-              <li class="task-todo"><span>Guide installation IT</span></li>
-              <li class="task-todo"><span>Documentation utilisateur complète</span></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="phase-deliverables phase-deliverables-v1">
-          <div class="deliverable-title"><i class="fas fa-box-open"></i> Livrables V1.0</div>
-          <div class="deliverables-list">
-            <span class="deliverable"><i class="fas fa-file-archive"></i> qr-poster-studio-v1.0-setup.exe</span>
-            <span class="deliverable"><i class="fas fa-file-archive"></i> qr-poster-studio-v1.0.msi</span>
-            <span class="deliverable"><i class="fas fa-images"></i> 4 templates A4/A5 officiels</span>
-            <span class="deliverable"><i class="fas fa-book"></i> Doc utilisateur FR/EN</span>
-            <span class="deliverable"><i class="fas fa-clipboard-check"></i> Rapport tests qualité</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- PHASE V2 -->
-      <div class="phase-connector">
-        <div class="connector-line"></div>
-        <div class="connector-badge connector-badge-v2"><i class="fas fa-arrow-down"></i></div>
-        <div class="connector-line"></div>
-      </div>
-
-      <div class="phase-block phase-v2">
-        <div class="phase-header">
-          <div class="phase-badge phase-badge-v2">V2.0</div>
-          <div class="phase-info">
-            <h3>Phase 2 · Évolutions & Scale</h3>
-            <div class="phase-meta">
-              <span><i class="fas fa-calendar"></i> Semaines 11–18</span>
-              <span><i class="fas fa-clock"></i> ~8 semaines</span>
-              <span><i class="fas fa-bullseye"></i> Multi-pays GIMAC</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="v2-features-grid">
-          <div class="v2-feature">
-            <i class="fas fa-globe"></i>
-            <h4>Multi-pays GIMAC</h4>
-            <p>Support Cameroun, Guinée Équatoriale, Congo, RCA, Tchad + logos locaux</p>
-          </div>
-          <div class="v2-feature">
-            <i class="fas fa-database"></i>
-            <h4>Base marchands locale</h4>
-            <p>SQLite intégré, recherche full-text, historique générations par marchand</p>
-          </div>
-          <div class="v2-feature">
-            <i class="fas fa-magic"></i>
-            <h4>Smart Templates</h4>
-            <p>Templates adaptatifs selon catégorie marchand (alimentaire, télécom, services…)</p>
-          </div>
-          <div class="v2-feature">
-            <i class="fas fa-sync"></i>
-            <h4>Sync optionnelle</h4>
-            <p>Import API REST (si connexion disponible), synchronisation BD marchands</p>
-          </div>
-          <div class="v2-feature">
-            <i class="fas fa-palette"></i>
-            <h4>Éditeur de couleurs avancé</h4>
-            <p>Palette Moov Money verrouillable, dégradés, opacité, blending modes</p>
-          </div>
-          <div class="v2-feature">
-            <i class="fas fa-code"></i>
-            <h4>Plugin system</h4>
-            <p>Architecture plugins pour templates tiers, formats export custom</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- DATA MODEL SECTION -->
-<section class="section section-alt" id="data">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Modèles de Données</span>
-      <h2 class="section-title">Structures & Schémas</h2>
-      <p class="section-desc">Données sérialisées localement via electron-store + SQLite (better-sqlite3).</p>
-    </div>
-
-    <div class="data-grid">
-      <!-- Merchant Schema -->
-      <div class="data-card">
-        <div class="data-card-header">
-          <i class="fas fa-store"></i>
-          <h3>Marchand (Merchant)</h3>
-          <span class="data-source">SQLite · merchants.db</span>
-        </div>
-        <div class="schema-table">
-          <div class="schema-row schema-header">
-            <span>Champ</span><span>Type</span><span>Requis</span><span>Description</span>
-          </div>
-          <div class="schema-row"><span class="field-name">id</span><span class="field-type">UUID</span><span class="field-req req-yes">✓</span><span>Identifiant unique auto</span></div>
-          <div class="schema-row"><span class="field-name">code</span><span class="field-type">STRING(20)</span><span class="field-req req-yes">✓</span><span>Code marchand A-Z 0-9 (PRIXIMPORT)</span></div>
-          <div class="schema-row"><span class="field-name">name</span><span class="field-type">STRING(100)</span><span class="field-req req-yes">✓</span><span>Nom commercial (PRIX IMPORT)</span></div>
-          <div class="schema-row"><span class="field-name">category</span><span class="field-type">ENUM</span><span class="field-req req-no">○</span><span>alimentaire|telecom|services|autre</span></div>
-          <div class="schema-row"><span class="field-name">address</span><span class="field-type">TEXT</span><span class="field-req req-no">○</span><span>Adresse physique</span></div>
-          <div class="schema-row"><span class="field-name">phone</span><span class="field-type">STRING(20)</span><span class="field-req req-no">○</span><span>Téléphone contact</span></div>
-          <div class="schema-row"><span class="field-name">qr_file_path</span><span class="field-type">PATH</span><span class="field-req req-no">○</span><span>Chemin local vers QR Code PNG</span></div>
-          <div class="schema-row"><span class="field-name">template_id</span><span class="field-type">UUID</span><span class="field-req req-no">○</span><span>Template assigné</span></div>
-          <div class="schema-row"><span class="field-name">last_generated</span><span class="field-type">DATETIME</span><span class="field-req req-no">○</span><span>Dernière génération affiche</span></div>
-          <div class="schema-row"><span class="field-name">created_at</span><span class="field-type">DATETIME</span><span class="field-req req-yes">✓</span><span>Auto</span></div>
-        </div>
-      </div>
-
-      <!-- Template Schema -->
-      <div class="data-card">
-        <div class="data-card-header">
-          <i class="fas fa-palette"></i>
-          <h3>Template</h3>
-          <span class="data-source">JSON · templates.json</span>
-        </div>
-        <div class="schema-table">
-          <div class="schema-row schema-header">
-            <span>Champ</span><span>Type</span><span>Requis</span><span>Description</span>
-          </div>
-          <div class="schema-row"><span class="field-name">id</span><span class="field-type">UUID</span><span class="field-req req-yes">✓</span><span>Identifiant unique</span></div>
-          <div class="schema-row"><span class="field-name">name</span><span class="field-type">STRING</span><span class="field-req req-yes">✓</span><span>Nom template (Moov Standard A4)</span></div>
-          <div class="schema-row"><span class="field-name">format</span><span class="field-type">ENUM</span><span class="field-req req-yes">✓</span><span>A4|A5|CUSTOM</span></div>
-          <div class="schema-row"><span class="field-name">orientation</span><span class="field-type">ENUM</span><span class="field-req req-yes">✓</span><span>portrait|landscape</span></div>
-          <div class="schema-row"><span class="field-name">width_px</span><span class="field-type">NUMBER</span><span class="field-req req-yes">✓</span><span>Largeur 300 DPI (2480 A4)</span></div>
-          <div class="schema-row"><span class="field-name">height_px</span><span class="field-type">NUMBER</span><span class="field-req req-yes">✓</span><span>Hauteur 300 DPI (3508 A4)</span></div>
-          <div class="schema-row"><span class="field-name">konva_json</span><span class="field-type">JSON</span><span class="field-req req-yes">✓</span><span>Sérialisation Konva Stage complète</span></div>
-          <div class="schema-row"><span class="field-name">variables</span><span class="field-type">ARRAY</span><span class="field-req req-yes">✓</span><span>[{name:"nom", type:"text"}, ...]</span></div>
-          <div class="schema-row"><span class="field-name">thumbnail_b64</span><span class="field-type">BASE64</span><span class="field-req req-no">○</span><span>Miniature 200px preview</span></div>
-          <div class="schema-row"><span class="field-name">is_default</span><span class="field-type">BOOL</span><span class="field-req req-no">○</span><span>Template verrouillé Moov Money</span></div>
-        </div>
-      </div>
-
-      <!-- IPC Channels -->
-      <div class="data-card data-card-full">
-        <div class="data-card-header">
-          <i class="fas fa-exchange-alt"></i>
-          <h3>Canaux IPC — Communication Main ↔ Renderer</h3>
-          <span class="data-source">contextBridge · preload.js</span>
-        </div>
-        <div class="ipc-table">
-          <div class="ipc-row ipc-header">
-            <span>Canal</span><span>Direction</span><span>Params</span><span>Réponse</span><span>Description</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">csv:parse</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{filePath, delimiter}</code></span>
-            <span><code>{rows[], errors[]}</code></span>
-            <span>Parse CSV/Excel → JSON</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">qr:extract-folder</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{folderPath}</code></span>
-            <span><code>{qrFiles[], errors[]}</code></span>
-            <span>Scan dossier + extraction QR PDF</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">pdf:export-single</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{canvasDataUrl, merchant, outputPath}</code></span>
-            <span><code>{success, filePath}</code></span>
-            <span>Export PDF A4 300DPI unique</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">pdf:export-batch</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{merchants[], templateId, outputDir}</code></span>
-            <span><code>stream progress events</code></span>
-            <span>Génération batch avec progression</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">batch:progress</span>
-            <span class="ipc-dir dir-m2r">M→R</span>
-            <span>—</span>
-            <span><code>{current, total, merchantCode}</code></span>
-            <span>Mise à jour barre progression</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">template:save</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{template}</code></span>
-            <span><code>{success, id}</code></span>
-            <span>Sauvegarde template JSON</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">file:dialog-open</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{filters, properties}</code></span>
-            <span><code>{filePaths[]}</code></span>
-            <span>Dialog natif Windows open</span>
-          </div>
-          <div class="ipc-row">
-            <span class="ipc-channel">file:dialog-save</span>
-            <span class="ipc-dir dir-r2m">R→M</span>
-            <span><code>{defaultName, filters}</code></span>
-            <span><code>{filePath}</code></span>
-            <span>Dialog natif Windows save</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- TECH STACK SECTION -->
-<section class="section" id="tech">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Stack Technique</span>
-      <h2 class="section-title">Technologies & Dépendances</h2>
-      <p class="section-desc">Stack validée pour production offline Windows 11, toutes dépendances bundlées dans l'installer.</p>
-    </div>
-
-    <div class="tech-grid">
-      <div class="tech-category">
-        <div class="tech-cat-header tech-cat-core">
-          <i class="fas fa-atom"></i>
-          <span>Core Framework</span>
-        </div>
-        <div class="tech-items">
-          <div class="tech-item">
-            <div class="tech-logo tech-electron"><i class="fas fa-atom"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Electron 31</span>
-              <span class="tech-version">v31.x LTS</span>
-              <span class="tech-desc">Runtime desktop cross-process</span>
-            </div>
-            <div class="tech-badge tech-badge-critical">Critique</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-node"><i class="fab fa-node-js"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Node.js 20 LTS</span>
-              <span class="tech-version">v20.x</span>
-              <span class="tech-desc">Runtime Main Process</span>
-            </div>
-            <div class="tech-badge tech-badge-critical">Critique</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-chromium"><i class="fab fa-chrome"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Chromium (via Electron)</span>
-              <span class="tech-version">v126+</span>
-              <span class="tech-desc">Renderer sandbox</span>
-            </div>
-            <div class="tech-badge tech-badge-bundled">Bundlé</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tech-category">
-        <div class="tech-cat-header tech-cat-canvas">
-          <i class="fas fa-vector-square"></i>
-          <span>Canvas & UI</span>
-        </div>
-        <div class="tech-items">
-          <div class="tech-item">
-            <div class="tech-logo tech-konva"><i class="fas fa-layer-group"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Konva.js</span>
-              <span class="tech-version">v9.x</span>
-              <span class="tech-desc">Canvas 2D, calques, transformer, drag</span>
-            </div>
-            <div class="tech-badge tech-badge-critical">Critique</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-webpack"><i class="fas fa-cube"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Webpack 5</span>
-              <span class="tech-version">v5.x</span>
-              <span class="tech-desc">Bundler renderer process</span>
-            </div>
-            <div class="tech-badge tech-badge-build">Build</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-zustand"><i class="fas fa-share-nodes"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Zustand</span>
-              <span class="tech-version">v4.x</span>
-              <span class="tech-desc">State management léger</span>
-            </div>
-            <div class="tech-badge tech-badge-core">Core</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tech-category">
-        <div class="tech-cat-header tech-cat-pdf">
-          <i class="fas fa-file-pdf"></i>
-          <span>PDF & Image</span>
-        </div>
-        <div class="tech-items">
-          <div class="tech-item">
-            <div class="tech-logo tech-pdfkit"><i class="fas fa-file-pdf"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">PDFKit</span>
-              <span class="tech-version">v0.15.x</span>
-              <span class="tech-desc">Génération PDF print-ready</span>
-            </div>
-            <div class="tech-badge tech-badge-critical">Critique</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-sharp"><i class="fas fa-image"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Sharp</span>
-              <span class="tech-version">v0.33.x</span>
-              <span class="tech-desc">Image processing 300 DPI haute perf</span>
-            </div>
-            <div class="tech-badge tech-badge-critical">Critique</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-pdf2pic"><i class="fas fa-file-arrow-down"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">pdf2pic</span>
-              <span class="tech-version">v3.x</span>
-              <span class="tech-desc">Extraction QR depuis PDF (Ghostscript)</span>
-            </div>
-            <div class="tech-badge tech-badge-critical">Critique</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-jimp"><i class="fas fa-crop-alt"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Jimp</span>
-              <span class="tech-version">v0.22.x</span>
-              <span class="tech-desc">Recadrage auto QR (pure JS, no bindings)</span>
-            </div>
-            <div class="tech-badge tech-badge-core">Core</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tech-category">
-        <div class="tech-cat-header tech-cat-data">
-          <i class="fas fa-database"></i>
-          <span>Data & Storage</span>
-        </div>
-        <div class="tech-items">
-          <div class="tech-item">
-            <div class="tech-logo tech-sqlite"><i class="fas fa-database"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">better-sqlite3</span>
-              <span class="tech-version">v9.x</span>
-              <span class="tech-desc">SQLite3 synchrone haute performance</span>
-            </div>
-            <div class="tech-badge tech-badge-core">Core</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-store"><i class="fas fa-hard-drive"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">electron-store</span>
-              <span class="tech-version">v10.x</span>
-              <span class="tech-desc">Préférences persistantes JSON</span>
-            </div>
-            <div class="tech-badge tech-badge-core">Core</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-papa"><i class="fas fa-file-csv"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">PapaParse</span>
-              <span class="tech-version">v5.x</span>
-              <span class="tech-desc">Parser CSV robuste</span>
-            </div>
-            <div class="tech-badge tech-badge-core">Core</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-xlsx"><i class="fas fa-file-excel"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">SheetJS (xlsx)</span>
-              <span class="tech-version">v0.20.x</span>
-              <span class="tech-desc">Lecture Excel .xlsx/.xls</span>
-            </div>
-            <div class="tech-badge tech-badge-core">Core</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tech-category">
-        <div class="tech-cat-header tech-cat-build">
-          <i class="fas fa-box"></i>
-          <span>Build & Packaging</span>
-        </div>
-        <div class="tech-items">
-          <div class="tech-item">
-            <div class="tech-logo tech-builder"><i class="fas fa-box"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">electron-builder</span>
-              <span class="tech-version">v25.x</span>
-              <span class="tech-desc">Packaging .exe NSIS + .msi</span>
-            </div>
-            <div class="tech-badge tech-badge-build">Build</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-nsis"><i class="fas fa-download"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">NSIS Installer</span>
-              <span class="tech-version">v3.x</span>
-              <span class="tech-desc">Installeur Windows UI native</span>
-            </div>
-            <div class="tech-badge tech-badge-build">Build</div>
-          </div>
-          <div class="tech-item">
-            <div class="tech-logo tech-jest"><i class="fas fa-vial"></i></div>
-            <div class="tech-info">
-              <span class="tech-name">Jest + Playwright</span>
-              <span class="tech-version">v29 / v1.x</span>
-              <span class="tech-desc">Tests unitaires + E2E</span>
-            </div>
-            <div class="tech-badge tech-badge-build">Tests</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dépendances système -->
-      <div class="tech-category tech-category-sys">
-        <div class="tech-cat-header tech-cat-sys">
-          <i class="fab fa-windows"></i>
-          <span>Dépendances Système Bundlées</span>
-        </div>
-        <div class="tech-sys-note">
-          <i class="fas fa-info-circle"></i>
-          <span>Ces composants doivent être <strong>embarqués dans l'installeur</strong> pour garantir le fonctionnement 100% offline.</span>
-        </div>
-        <div class="tech-sys-items">
-          <div class="tech-sys-item">
-            <i class="fas fa-ghost"></i>
-            <span class="sys-name">Ghostscript 10.x</span>
-            <span class="sys-desc">Requis par pdf2pic pour conversion PDF → PNG</span>
-            <span class="tech-badge tech-badge-bundled">Bundlé</span>
-          </div>
-          <div class="tech-sys-item">
-            <i class="fas fa-font"></i>
-            <span class="sys-name">Polices embarquées</span>
-            <span class="sys-desc">Inter, Poppins, Ubuntu (ou polices Moov Money officielles)</span>
-            <span class="tech-badge tech-badge-bundled">Bundlé</span>
-          </div>
-          <div class="tech-sys-item">
-            <i class="fas fa-print"></i>
-            <span class="sys-name">Profils ICC couleur</span>
-            <span class="sys-desc">sRGB IEC61966-2.1 pour fidélité impression</span>
-            <span class="tech-badge tech-badge-bundled">Bundlé</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- package.json preview -->
-    <div class="code-preview">
-      <div class="code-header">
-        <div class="code-dots">
-          <span class="dot dot-red"></span>
-          <span class="dot dot-yellow"></span>
-          <span class="dot dot-green"></span>
-        </div>
-        <span class="code-filename">package.json · Dépendances clés</span>
-      </div>
-      <pre class="code-block"><code>{
-  <span class="code-key">"name"</span>: <span class="code-str">"qr-poster-studio"</span>,
-  <span class="code-key">"version"</span>: <span class="code-str">"0.1.0-mvp"</span>,
-  <span class="code-key">"description"</span>: <span class="code-str">"Générateur d'affiches QR Code Moov Money Gabon — Desktop Windows 11"</span>,
-  <span class="code-key">"main"</span>: <span class="code-str">"src/main/main.js"</span>,
-  <span class="code-key">"scripts"</span>: {
-    <span class="code-key">"start"</span>: <span class="code-str">"electron ."</span>,
-    <span class="code-key">"dev"</span>: <span class="code-str">"webpack --watch & electron . --dev"</span>,
-    <span class="code-key">"build"</span>: <span class="code-str">"webpack --mode=production"</span>,
-    <span class="code-key">"pack"</span>: <span class="code-str">"electron-builder --win"</span>,
-    <span class="code-key">"test"</span>: <span class="code-str">"jest"</span>,
-    <span class="code-key">"test:e2e"</span>: <span class="code-str">"playwright test"</span>
-  },
-  <span class="code-key">"dependencies"</span>: {
-    <span class="code-comment">// Canvas & UI</span>
-    <span class="code-key">"konva"</span>: <span class="code-str">"^9.3.0"</span>,
-    <span class="code-key">"zustand"</span>: <span class="code-str">"^4.5.0"</span>,
-    <span class="code-key">"i18next"</span>: <span class="code-str">"^23.0.0"</span>,
-    <span class="code-comment">// PDF & Image</span>
-    <span class="code-key">"pdfkit"</span>: <span class="code-str">"^0.15.0"</span>,
-    <span class="code-key">"sharp"</span>: <span class="code-str">"^0.33.0"</span>,
-    <span class="code-key">"pdf2pic"</span>: <span class="code-str">"^3.1.0"</span>,
-    <span class="code-key">"jimp"</span>: <span class="code-str">"^0.22.0"</span>,
-    <span class="code-comment">// Data</span>
-    <span class="code-key">"better-sqlite3"</span>: <span class="code-str">"^9.4.0"</span>,
-    <span class="code-key">"electron-store"</span>: <span class="code-str">"^10.0.0"</span>,
-    <span class="code-key">"papaparse"</span>: <span class="code-str">"^5.4.0"</span>,
-    <span class="code-key">"xlsx"</span>: <span class="code-str">"^0.20.0"</span>,
-    <span class="code-comment">// Utils</span>
-    <span class="code-key">"electron-log"</span>: <span class="code-str">"^5.0.0"</span>,
-    <span class="code-key">"uuid"</span>: <span class="code-str">"^9.0.0"</span>
-  },
-  <span class="code-key">"devDependencies"</span>: {
-    <span class="code-key">"electron"</span>: <span class="code-str">"^31.0.0"</span>,
-    <span class="code-key">"electron-builder"</span>: <span class="code-str">"^25.0.0"</span>,
-    <span class="code-key">"webpack"</span>: <span class="code-str">"^5.91.0"</span>,
-    <span class="code-key">"jest"</span>: <span class="code-str">"^29.0.0"</span>,
-    <span class="code-key">"@playwright/test"</span>: <span class="code-str">"^1.44.0"</span>
-  }
-}</code></pre>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-content">
-    <div class="footer-brand">
-      <img src="https://www.genspark.ai/api/files/s/l8H1vXO1" alt="Moov Money" onerror="this.style.display='none'" style="height:32px;" />
+  <div class="sbs">
+    <h3><i class="fas fa-file-csv"></i> Batch</h3>
+    <div class="fg" style="display:flex;flex-direction:column;gap:4px;">
       <div>
-        <div class="footer-name">QR Poster Studio</div>
-        <div class="footer-version">v1.1 · Architecture & Roadmap · Mars 2026</div>
+        <button class="btn bgy" style="width:100%;justify-content:center;" onclick="document.getElementById('csvFileInput').click();">
+          <i class="fas fa-upload"></i> Importer CSV
+        </button>
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" onchange="fileCSV(event)">
+      </div>
+      <div>
+        <button class="btn bgy" style="width:100%;justify-content:center;" onclick="openCSV()">
+          <i class="fas fa-clipboard"></i> Coller CSV
+        </button>
       </div>
     </div>
-    <div class="footer-partners">
-      <span class="footer-label">Partenaires</span>
-      <img src="https://www.genspark.ai/api/files/s/udxIKAKA" alt="GimacPay" onerror="this.style.display='none'" style="height:28px; filter: grayscale(0.3);" />
-      <img src="https://www.genspark.ai/api/files/s/DBhugC0K" alt="maDIGIPRIE" onerror="this.style.display='none'" style="height:28px;" />
-    </div>
-    <div class="footer-copy">
-      © 2026 MOOV Money Gabon · Générateur d'Affiches v1.0 · <span class="footer-offline">Mode Offline ✓</span>
+    <div id="blist" style="margin-top:8px;max-height:120px;overflow:auto;"></div>
+    <div id="bacts" style="display:none;flex-direction:column;gap:4px;margin-top:6px;">
+      <div style="display:flex;gap:4px;">
+        <button class="btn bgy" style="flex:1;" onclick="clearBatch()"><i class="fas fa-trash"></i> Effacer liste</button>
+        <button class="btn bgr" style="flex:1;" onclick="batchExportPDF()"><i class="fas fa-file-pdf"></i> PDF multi-pages</button>
+      </div>
+      <div id="bprog" style="height:4px;background:#1e293b;margin-top:4px;display:none;">
+        <div id="bfill" style="height:100%;background:var(--or);width:0%;"></div>
+      </div>
     </div>
   </div>
-</footer>
 
-<script src="js/main.js"></script>
+</aside>
+
+<!-- ══════════════ CANVAS ══════════════ -->
+<div class="ca">
+  <div class="cvp" id="cvp">
+    <div class="poster-wrap" id="pw">
+
+      <!-- ════════════════════════════════
+           AFFICHE A4 — 794 × 1123 px
+      ════════════════════════════════ -->
+      <div class="poster" id="poster">
+
+        <!-- ZONE TOP -->
+        <div class="p-top" id="zoneTop">
+
+          <!-- Logo Moov Money -->
+          <div class="p-logo editable" id="elLogo" data-label="Logo Moov Money" data-type="image">
+            <img src="assets/logoMoov.PNG" alt="Logo Moov Money" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+
+          <!-- URL -->
+          <div class="p-url editable" id="elUrl" data-label="URL moovmoney.ga" data-type="text">
+            moovmoney.ga
+          </div>
+
+        </div><!-- /p-top -->
+
+        <!-- CARTE BLANCHE -->
+        <div class="p-card" id="pCard">
+
+          <!-- Nom marchand -->
+          <div class="p-name editable" id="elName" data-label="Nom marchand" data-type="text">
+            NOM DU MARCHAND
+          </div>
+
+          <!-- Label code -->
+          <div class="p-codelabel editable" id="elCodeLbl" data-label="Label Code marchand" data-type="text">
+            Code marchand
+          </div>
+
+          <!-- Boîtes code -->
+          <div class="p-codebox-row" id="cboxRow"></div>
+
+          <!-- QR -->
+          <div class="p-qr editable" id="elQR" data-label="QR Code" data-type="image">
+            <canvas id="qrCanvas" width="368" height="368"></canvas>
+          </div>
+
+          <!-- Drapeaux CEMAC — ordre : GA CM GQ CG CF TD — 380×42px sans espace —
+               Chaque drapeau = flex:1 → 6 parts égales de 380/6 ≈ 63.3 × 42 px -->
+          <div class="p-flags editable" id="elFlags" data-label="Drapeaux CEMAC" data-type="image">
+            <!-- Chaque drapeau est dessiné en CSS via les classes fi-* pour garantir un rendu identique à l'écran et à l'export -->
+            <div class="fi fi-ga" title="Gabon"></div>
+            <div class="fi fi-cm" title="Cameroun"></div>
+            <div class="fi fi-gq" title="Guinée Équatoriale"></div>
+            <div class="fi fi-cg" title="Congo"></div>
+            <div class="fi fi-cf" title="Centrafrique"></div>
+            <div class="fi fi-td" title="Tchad"></div>
+          </div>
+
+          <!-- GIMACPAY — 277×98px (+30%), lettres uniquement -->
+          <div class="p-gimacpay editable" id="elGimacpay" data-label="Logo GIMACPAY" data-type="image">
+            <img src="assets/logo-gimacpay.png" alt="GIMACPAY"
+                 style="width:277px;height:98px;object-fit:contain;display:block;">
+          </div>
+
+          <!-- VOS PAIEMENTS -->
+          <div class="p-vos editable" id="elVos" data-label="VOS PAIEMENTS" data-type="text">VOS PAIEMENTS MOBILES ACCEPTÉS ICI</div>
+
+        </div><!-- /p-card -->
+
+        <!-- ZONE BAS -->
+        <div class="p-bot">
+          <!-- Capsule maDIGIPRIE -->
+          <div class="p-cap editable" id="elMadigi" data-label="Logo maDIGIPRIE" data-type="image">
+            <img src="assets/logo-madigi.png" alt="maDIGIPRIE"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="p-cap-txt">maDIGIPRIE</span>
+          </div>
+          <!-- Capsule GIMAC -->
+          <div class="p-cap editable" id="elGimac" data-label="Logo GIMAC" data-type="image">
+            <img src="assets/logo-gimac.png" alt="GIMAC"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="p-cap-txt">GIMAC</span>
+          </div>
+        </div>
+
+      </div><!-- /poster -->
+    </div><!-- /poster-wrap -->
+  </div><!-- /cvp -->
+</div><!-- /ca -->
+
+<!-- ══════════════ PANNEAU DROITE ══════════════ -->
+<aside class="rp" style="display:none;">
+  <div class="rph">
+    <h3 id="rpTitle">✏️ Propriétés</h3>
+  </div>
+  <div class="rpb" id="rpBody">
+
+    <div id="rpEmpty" class="rpe">
+      <i class="fas fa-mouse-pointer"></i>
+      Activez le mode <strong style="color:var(--or);">Édition</strong><br>
+      puis cliquez sur un<br>élément de l'affiche
+    </div>
+
+    <div id="rpProps" style="display:none;">
+      <div class="pbadge" id="rpBadge">—</div>
+
+      <!-- Texte -->
+      <div class="prw" id="prTxtRow">
+        <label>Texte</label>
+        <input type="text" id="prTxt" oninput="applyProp('text',this.value)" placeholder="Contenu…">
+      </div>
+
+      <!-- Police -->
+      <div class="prw" id="prFsRow">
+        <label>Taille police (px)</label>
+        <input type="number" id="prFs" min="6" max="200" oninput="applyProp('fontSize',this.value+'px')">
+      </div>
+
+      <!-- Couleur texte -->
+      <div class="prw" id="prColRow">
+        <label>Couleur</label>
+        <input type="color" id="prCol" oninput="applyProp('color',this.value)">
+      </div>
+
+      <!-- Alignement -->
+      <div class="prw" id="prAlnRow">
+        <label>Alignement</label>
+        <select id="prAln" onchange="applyProp('textAlign',this.value)">
+          <option value="left">◀ Gauche</option>
+          <option value="center" selected>■ Centre</option>
+          <option value="right">▶ Droite</option>
+        </select>
+      </div>
+
+      <!-- Gras / Italique -->
+      <div class="prw" id="prStyleRow">
+        <label>Style</label>
+        <div style="display:flex;gap:4px;">
+          <button class="btn bgy" id="prBold" onclick="toggleBold()" style="flex:1;justify-content:center;font-size:12px;padding:5px;"><b>G</b></button>
+          <button class="btn bgy" id="prItalic" onclick="toggleItalic()" style="flex:1;justify-content:center;font-size:12px;padding:5px;font-style:italic;">I</button>
+        </div>
+      </div>
+
+      <div class="prsep"></div>
+
+      <!-- Image : remplacer -->
+      <div class="prw" id="prImgRow" style="display:none;">
+        <label>Remplacer l'image</label>
+        <div class="uz" style="padding:10px;">
+          <input type="file" id="prImgFile" accept="image/*,.pdf" onchange="replaceImage(event)">
+          <div class="uz-ic" style="font-size:16px;">🖼️</div>
+          <div class="uz-tx" style="font-size:10.5px;">Cliquer pour choisir</div>
+          <div class="uz-sx">PNG · JPG · PDF</div>
+        </div>
+      </div>
+
+      <div class="prsep"></div>
+
+      <!-- Position -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div class="prw">
+          <label>Position X</label>
+          <input type="number" id="prX" oninput="applyPos('x',+this.value)">
+        </div>
+        <div class="prw">
+          <label>Position Y</label>
+          <input type="number" id="prY" oninput="applyPos('y',+this.value)">
+        </div>
+      </div>
+
+      <!-- Taille -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div class="prw">
+          <label>Largeur</label>
+          <input type="number" id="prW" oninput="applySize('w',+this.value)">
+        </div>
+        <div class="prw">
+          <label>Hauteur</label>
+          <input type="number" id="prH" oninput="applySize('h',+this.value)">
+        </div>
+      </div>
+
+      <!-- Opacité -->
+      <div class="prw">
+        <label>Opacité — <span id="prOpV">100%</span></label>
+        <input type="range" id="prOp" min="0" max="1" step="0.05" value="1"
+               oninput="applyProp('opacity',+this.value);prOpV.textContent=Math.round(this.value*100)+'%'">
+      </div>
+
+      <div class="prsep"></div>
+
+      <div class="prrow">
+        <button class="btn bgy" onclick="dupEl()" style="flex:1;justify-content:center;font-size:10px;"><i class="fas fa-copy"></i> Dupliquer</button>
+        <button class="btn bred" onclick="hideEl()" style="flex:1;justify-content:center;font-size:10px;"><i class="fas fa-eye-slash"></i> Masquer</button>
+      </div>
+      <div class="prrow" style="margin-top:4px;">
+        <button class="btn bgy" onclick="resetEl()" style="width:100%;justify-content:center;font-size:10px;"><i class="fas fa-undo"></i> Réinitialiser cet élément</button>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+</div><!-- /main -->
+
+<!-- STATUS -->
+<div class="stb">
+  <div><span class="sdot"></span>QR Poster Studio v2.3 — Prêt</div>
+  <div id="stInf">A4 · 794×1123 px · Mode Édition</div>
+  <div>Moov Money Gabon © 2026</div>
+</div>
+
+<!-- MODAL CSV -->
+<div class="mov" id="csvMod">
+  <div class="mbox">
+    <button class="mclose" onclick="document.getElementById('csvMod').classList.remove('op')">✕</button>
+    <h3><i class="fas fa-file-csv" style="color:#22c55e;margin-right:7px;"></i>Import CSV</h3>
+    <div class="fg" style="margin-top:10px;">
+      <label>Format : <code style="color:#22c55e;background:#0f172a;padding:2px 5px;border-radius:4px;">nom,code</code></label>
+      <textarea id="csvTA" rows="7" style="width:100%;padding:8px;background:#0f172a;border:1.5px solid #334155;border-radius:6px;color:#fff;font-family:monospace;font-size:11px;resize:vertical;outline:none;margin-top:5px;" placeholder="MEGA MARKET,MEGAMARKET&#10;SUPER STORE,SUPERST001"></textarea>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px;">
+      <button class="btn bgr" style="flex:1;justify-content:center;" onclick="parseCSVModal()"><i class="fas fa-play"></i> Importer</button>
+      <button class="btn bgy" style="flex:1;justify-content:center;" onclick="document.getElementById('csvMod').classList.remove('op')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"><span id="toastMsg">—</span></div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// pdf.js n'est plus initialisé à l'avance — il est chargé à la demande
+// dans importQRfromPDF() et importPDFasImage(), qui fixent aussi le worker.
+// (La fonction initPDFjs et son appel étaient ici, mais ils sont désormais inutiles.)
+
+// ═══════ STATE ═══════
+let Z=0.75, editMode=true, selEl=null, batch=[], qrImported=false, currentBatchIndex=undefined;
+const origStyles={}; // pour reset
+
+// ═══════ ZOOM ═══════
+function doZoom(d){ Z=Math.max(0.15,Math.min(2,Z+d)); applyZ(); }
+function zoomFit(){
+  const vp=document.getElementById('cvp');
+  Z=Math.min((vp.clientWidth-60)/794,(vp.clientHeight-40)/1123);
+  applyZ();
+}
+function applyZ(){
+  const pw=document.getElementById('pw');
+  pw.style.transform=`scale(${Z})`;
+  pw.style.transformOrigin='top center';
+  pw.style.marginBottom=(1123*(Z-1))+'px';
+  const zvlEl = document.getElementById('zvl');
+  if(zvlEl) zvlEl.textContent=Math.round(Z*100)+'%';
+}
+
+// ═══════ EDIT MODE ═══════
+function toggleEdit(){
+  editMode=!editMode;
+  const btn=document.getElementById('btnEd');
+  const edLbl=document.getElementById('edLbl');
+  if(edLbl) edLbl.textContent=editMode?'Édition ON':'Aperçu';
+  if(btn) btn.classList.toggle('on',editMode);
+  document.querySelectorAll('.editable').forEach(el=>{
+    el.style.cursor=editMode?'move':'default';
+  });
+  if(!editMode) deselectAll();
+  const stInf=document.getElementById('stInf');
+  if(stInf) stInf.textContent=editMode?'A4 · Mode Édition actif':'A4 · Mode Aperçu';
+}
+
+// ═══════ SELECTION ═══════
+function selectEl(el){
+  deselectAll();
+  selEl=el;
+  el.classList.add('sel');
+  const selLabel = document.getElementById('selLabel');
+  if(selLabel) selLabel.textContent='✏️ '+( el.dataset.label||el.id);
+  showProps(el);
+}
+function deselectAll(){
+  document.querySelectorAll('.editable.sel').forEach(e=>e.classList.remove('sel'));
+  selEl=null;
+  const selLabel = document.getElementById('selLabel');
+  if(selLabel) selLabel.textContent='Aucun élément sélectionné';
+  const rpEmpty = document.getElementById('rpEmpty');
+  const rpProps = document.getElementById('rpProps');
+  if(rpEmpty) rpEmpty.style.display='block';
+  if(rpProps) rpProps.style.display='none';
+}
+
+// ═══════ PROPERTIES PANEL ═══════
+function showProps(el){
+  document.getElementById('rpEmpty').style.display='none';
+  document.getElementById('rpProps').style.display='block';
+  document.getElementById('rpBadge').textContent=el.dataset.label||el.id;
+  const type=el.dataset.type;
+  const isText=type==='text';
+  const isImg=type==='image';
+  // show/hide rows
+  ['prTxtRow','prFsRow','prColRow','prAlnRow','prStyleRow'].forEach(id=>{
+    document.getElementById(id).style.display=isText?'block':'none';
+  });
+  document.getElementById('prImgRow').style.display=isImg?'block':'none';
+  if(isText){
+    document.getElementById('prTxt').value=el.innerText.trim();
+    const cs=getComputedStyle(el);
+    document.getElementById('prFs').value=parseInt(cs.fontSize)||16;
+    document.getElementById('prCol').value=rgb2hex(cs.color);
+    document.getElementById('prAln').value=cs.textAlign||'center';
+    document.getElementById('prBold').classList.toggle('bbl',cs.fontWeight>='700');
+    document.getElementById('prItalic').classList.toggle('bbl',cs.fontStyle==='italic');
+  }
+  const r=el.getBoundingClientRect();
+  const pr=document.getElementById('poster').getBoundingClientRect();
+  document.getElementById('prX').value=Math.round((r.left-pr.left)/Z);
+  document.getElementById('prY').value=Math.round((r.top-pr.top)/Z);
+  document.getElementById('prW').value=Math.round(r.width/Z);
+  document.getElementById('prH').value=Math.round(r.height/Z);
+  document.getElementById('prOp').value=parseFloat(el.style.opacity)||1;
+  document.getElementById('prOpV').textContent=Math.round((parseFloat(el.style.opacity)||1)*100)+'%';
+  document.getElementById('rpTitle').textContent='✏️ '+(el.dataset.label||'Propriétés');
+}
+
+function applyProp(prop,val){
+  if(!selEl)return;
+  if(prop==='text'){
+    selEl.innerText=val;
+    // Rebuild code boxes if code label
+    if(selEl.id==='elCodeLbl') selEl.innerText=val;
+  } else if(prop==='fontSize'){
+    selEl.style.fontSize=val;
+  } else if(prop==='color'){
+    selEl.style.color=val;
+  } else if(prop==='textAlign'){
+    selEl.style.textAlign=val;
+  } else if(prop==='opacity'){
+    selEl.style.opacity=val;
+    document.getElementById('prOpV').textContent=Math.round(val*100)+'%';
+  }
+}
+function applyPos(axis,v){
+  if(!selEl)return;
+  const pr=document.getElementById('poster').getBoundingClientRect();
+  const r=selEl.getBoundingClientRect();
+  if(axis==='x'){
+    const cur=(r.left-pr.left)/Z;
+    selEl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)+(v-cur))+'px';
+  } else {
+    const cur=(r.top-pr.top)/Z;
+    selEl.style.marginTop=(parseFloat(selEl.style.marginTop||0)+(v-cur))+'px';
+  }
+}
+function applySize(axis,v){
+  if(!selEl||v<=0)return;
+  if(axis==='w') selEl.style.width=v+'px';
+  else selEl.style.height=v+'px';
+}
+function toggleBold(){
+  if(!selEl)return;
+  const cs=getComputedStyle(selEl);
+  const nb=cs.fontWeight>='700'?'normal':'900';
+  selEl.style.fontWeight=nb;
+  document.getElementById('prBold').classList.toggle('bbl',nb==='900');
+}
+function toggleItalic(){
+  if(!selEl)return;
+  const cs=getComputedStyle(selEl);
+  const ni=cs.fontStyle==='italic'?'normal':'italic';
+  selEl.style.fontStyle=ni;
+  document.getElementById('prItalic').classList.toggle('bbl',ni==='italic');
+}
+function dupEl(){
+  if(!selEl)return;
+  const cl=selEl.cloneNode(true);
+  cl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)+16)+'px';
+  cl.style.marginTop=(parseFloat(selEl.style.marginTop||0)+16)+'px';
+  cl.classList.remove('sel');
+  cl.id=selEl.id+'_copy'+Date.now();
+  selEl.parentNode.appendChild(cl);
+  bindEditable(cl);
+  toast('✅ Élément dupliqué');
+}
+function hideEl(){
+  if(!selEl)return;
+  selEl.style.visibility='hidden';
+  deselectAll();
+  toast('👁️ Élément masqué (reset pour le rendre visible)');
+}
+function resetEl(){
+  if(!selEl)return;
+  selEl.removeAttribute('style');
+  showProps(selEl);
+  toast('↩️ Élément réinitialisé');
+}
+
+// ═══════ REPLACE IMAGE ═══════
+function replaceImage(e){
+  const f=e.target.files[0]; if(!f)return;
+  if(f.type==='application/pdf'){
+    importPDFasImage(f,selEl);
+  } else {
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img=selEl.querySelector('img');
+      if(img){img.src=ev.target.result;img.style.display='block';}
+      else selEl.innerHTML=`<img src="${ev.target.result}" style="max-height:100%;max-width:100%;object-fit:contain;">`;
+      toast('🖼️ Image remplacée');
+    };
+    r.readAsDataURL(f);
+  }
+}
+async function importPDFasImage(f,target){
+  toast('⏳ Extraction PDF…','warn');
+  // S'assurer que pdf.js est disponible
+  if(typeof pdfjsLib==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=()=>{
+        pdfjsLib.GlobalWorkerOptions.workerSrc=
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        res();
+      };
+      s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  try{
+    const ab=await f.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(ab)}).promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:3});
+    const tmp=document.createElement('canvas');
+    tmp.width=vp.width; tmp.height=vp.height;
+    await page.render({canvasContext:tmp.getContext('2d'),viewport:vp}).promise;
+    const dataUrl=tmp.toDataURL('image/png',1);
+    if(target){
+      const img=target.querySelector('img');
+      if(img){img.src=dataUrl;img.style.display='block';}
+      else target.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;">`;
+    }
+    toast('✅ PDF extrait et appliqué !');
+  }catch(err){
+    console.error('PDF render error:',err);
+    toast('❌ Erreur PDF : '+err.message,'err');
+  }
+}
+
+// ═══════ QR ═══════
+function fileQR(e){ const f=e.target.files[0]; if(f) processQRFile(f); }
+function dropQR(e){
+  e.preventDefault();
+  document.getElementById('qrZone').classList.remove('dov');
+  const f=e.dataTransfer.files[0]; if(f) processQRFile(f);
+}
+function processQRFile(f){
+  if(f.type==='application/pdf') importQRfromPDF(f);
+  else { const r=new FileReader(); r.onload=ev=>setQRImg(ev.target.result); r.readAsDataURL(f); }
+}
+async function importQRfromPDF(f){
+  toast('⏳ Extraction QR du PDF…','warn');
+  // S'assurer que pdf.js est disponible
+  if(typeof pdfjsLib==='undefined'){
+    toast('⏳ Chargement pdf.js…','warn');
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=()=>{
+        pdfjsLib.GlobalWorkerOptions.workerSrc=
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        res();
+      };
+      s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  try{
+    const ab=await f.arrayBuffer();
+    const loadTask=pdfjsLib.getDocument({data:new Uint8Array(ab)});
+    const pdf=await loadTask.promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:3});
+    const tmp=document.createElement('canvas');
+    tmp.width=vp.width; tmp.height=vp.height;
+    const ctx=tmp.getContext('2d');
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    setQRImg(tmp.toDataURL('image/png',1));
+    toast('✅ QR extrait du PDF (page 1) !');
+  }catch(err){
+    console.error('PDF import error:',err);
+    toast('❌ Erreur PDF : '+err.message,'err');
+  }
+}
+function setQRImg(dataUrl){
+  qrImported=true;
+  const c=document.getElementById('elQR');
+  c.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;">`;
+  document.getElementById('qrThumb').src=dataUrl;
+  document.getElementById('qrThumb').style.display='block';
+  const btnClear = document.getElementById('btnClearQR');
+  if(btnClear){ btnClear.style.display='flex'; }
+  // sauvegarder le QR dans le marchand actuel du batch si applicable
+  if(window.currentBatchIndex!==undefined && batch[window.currentBatchIndex]){
+    batch[window.currentBatchIndex].qrData=dataUrl;
+    renderBatch();
+    toast('✅ QR importé pour '+batch[window.currentBatchIndex].name);
+  } else {
+    toast('✅ QR importé');
+  }
+}
+function clearQR(){
+  qrImported=false;
+  document.getElementById('qrThumb').style.display='none';
+  document.getElementById('qrFile').value='';
+  const c=document.getElementById('elQR');
+  // zone QR vide tant que l'utilisateur n'importe pas d'image
+  c.innerHTML='';
+  const btnClear = document.getElementById('btnClearQR');
+  if(btnClear){ btnClear.style.display='none'; }
+  // effacer le QR du marchand actuel du batch si applicable
+  if(window.currentBatchIndex!==undefined && batch[window.currentBatchIndex]){
+    batch[window.currentBatchIndex].qrData=null;
+    renderBatch();
+    toast('🗑️ QR effacé pour '+batch[window.currentBatchIndex].name);
+  } else {
+    toast('🗑️ QR effacé');
+  }
+}
+function refreshQR(){
+  // plus de génération automatique de QR "imaginaire"
+  // l'utilisateur doit importer un QR (image/PDF) pour remplir la zone
+}
+
+// ═══════ MARCHAND ═══════
+function liveName(el){
+  document.getElementById('nc').textContent=el.value.length;
+  document.getElementById('elName').innerText=el.value.toUpperCase()||'NOM DU MARCHAND';
+}
+function liveCode(el){
+  el.value=el.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  document.getElementById('cc2').textContent=el.value.length;
+  buildCodeBoxes(el.value);
+}
+function applyMerchant(){
+  const name=document.getElementById('iName').value.trim().toUpperCase()||'NOM DU MARCHAND';
+  const code=document.getElementById('iCode').value.trim().toUpperCase();
+  document.getElementById('elName').innerText=name;
+  buildCodeBoxes(code);
+  toast('✅ Marchand appliqué : '+name);
+}
+function buildCodeBoxes(code){
+  const row=document.getElementById('cboxRow');
+  row.innerHTML='';
+  const str=(code||'').trim();
+  if(!str) return;
+  const len=str.length;
+  const w=len>15?28:len>10?36:46;
+  const h=Math.round(w*1.17);
+  const fs=len>15?15:len>10?20:26;
+  for(const c of str){
+    const b=document.createElement('div');
+    b.className='cbox';
+    b.style.cssText=`width:${w}px;height:${h}px;font-size:${fs}px;`;
+    b.textContent=c;
+    row.appendChild(b);
+  }
+}
+
+// ═══════ DRAG & DROP ELEMENTS ═══════
+function bindEditable(el){
+  el.addEventListener('click',e=>{
+    if(!editMode)return;
+    e.stopPropagation();
+    selectEl(el);
+  });
+  // si interact.js est disponible, on utilise sa gestion de drag
+  if(typeof interact!=='undefined'){
+    interact(el).draggable({
+      allowFrom: 'body',
+      ignoreFrom: 'input, button',
+      listeners: {
+        start(event){ if(editMode) selectEl(el); },
+        move(event){
+          if(!editMode) return;
+          const dx = event.dx / Z;
+          const dy = event.dy / Z;
+          const currX = parseFloat(el.style.marginLeft)||0;
+          const currY = parseFloat(el.style.marginTop)||0;
+          el.style.marginLeft = (currX + dx) + 'px';
+          el.style.marginTop = (currY + dy) + 'px';
+          updatePosFields(el);
+        }
+      },
+      modifiers: [
+        interact.modifiers.restrictRect({
+          restriction: '#poster',
+          elementRect: { top:0,left:0,bottom:1,right:1 }
+        })
+      ]
+    });
+  }
+}
+
+function updatePosFields(el){
+  const r=el.getBoundingClientRect();
+  const pr=document.getElementById('poster').getBoundingClientRect();
+  document.getElementById('prX').value=Math.round((r.left-pr.left)/Z);
+  document.getElementById('prY').value=Math.round((r.top-pr.top)/Z);
+}
+function bindAll(){
+  document.querySelectorAll('.editable').forEach(bindEditable);
+}
+
+// ═══════ ADD TEXT ═══════
+function addTextEl(){
+  const el=document.createElement('div');
+  el.className='editable';
+  el.dataset.type='text';
+  el.dataset.label='Texte ajouté';
+  el.style.cssText='font-family:Arial;font-size:20px;font-weight:700;color:#000;text-align:center;cursor:move;padding:3px 6px;border-radius:3px;display:inline-block;white-space:nowrap;';
+  el.innerText='Nouveau texte';
+  el.contentEditable=editMode?'true':'false';
+  document.getElementById('pCard').appendChild(el);
+  bindEditable(el);
+  selectEl(el);
+  toast('✏️ Texte ajouté — cliquez pour sélectionner');
+}
+
+// ═══════ IMPORT IMAGE ═══════
+function importImageEl(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*,.pdf';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(f.type==='application/pdf'){
+      const el=document.createElement('div');el.className='editable';el.dataset.type='image';el.dataset.label='Image importée';
+      el.style.cssText='width:200px;height:100px;cursor:move;display:flex;align-items:center;justify-content:center;';
+      document.getElementById('pCard').appendChild(el);
+      bindEditable(el);selectEl(el);
+      importPDFasImage(f,el);
+    } else {
+      const r=new FileReader();r.onload=ev=>{
+        const el=document.createElement('div');el.className='editable';el.dataset.type='image';el.dataset.label='Image importée';
+        el.style.cssText='width:200px;height:100px;cursor:move;display:flex;align-items:center;justify-content:center;';
+        el.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+        document.getElementById('pCard').appendChild(el);
+        bindEditable(el);selectEl(el);
+        toast('🖼️ Image ajoutée');
+      };
+      r.readAsDataURL(f);
+    }
+  };
+  inp.click();
+}
+
+// ═══════ CSV ═══════
+function openCSV(){document.getElementById('csvMod').classList.add('op');}
+function fileCSV(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>parseCSV(ev.target.result);r.readAsText(f,'UTF-8');}
+function parseCSVModal(){parseCSV(document.getElementById('csvTA').value);document.getElementById('csvMod').classList.remove('op');}
+function parseCSV(txt){
+  const lines=txt.trim().split('\n').filter(l=>l.trim());
+  const items=[];
+  for(const l of lines){const p=l.split(/[,;|\t]/);if(p.length>=2)items.push({name:p[0].trim().replace(/["']/g,'').toUpperCase(),code:p[1].trim().replace(/["']/g,'').toUpperCase(),qrData:null});}
+  if(!items.length){toast('⚠️ Aucune donnée valide','warn');return;}
+  batch=items;renderBatch();toast(`✅ ${items.length} marchand(s) importé(s)`);
+  // mise en file de génération automatique pour le batch
+  if(batch.length) batchAll();
+}
+function renderBatch(){
+  const bl=document.getElementById('blist');bl.innerHTML='';
+  batch.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='bi';
+    const qrBadge=it.qrData?'<span style="font-size:9px;color:#22c55e;margin-left:6px;">📱 QR</span>':'';
+    d.innerHTML=`<div><div class="bi-nm">${it.name}${qrBadge}</div><div class="bi-cd">${it.code}</div></div>
+      <div class="bi-bb"><button class="bib bib-ld" onclick="loadBatch(${i})"><i class="fas fa-arrow-right"></i></button>
+      <button class="bib bib-dl" onclick="delBatch(${i})">✕</button></div>`;
+    bl.appendChild(d);
+  });
+  document.getElementById('bacts').style.display=batch.length?'flex':'none';
+}
+function loadBatch(i){
+  const it=batch[i];
+  // stocker l'indice du marchand actuel AVANT d'appliquer les changements
+  window.currentBatchIndex=i;
+  
+  document.getElementById('iName').value=it.name;document.getElementById('nc').textContent=it.name.length;
+  document.getElementById('iCode').value=it.code;document.getElementById('cc2').textContent=it.code.length;
+  applyMerchant();
+  // charger le QR code spécifique à ce marchand s'il existe
+  if(it.qrData){
+    qrImported=true;
+    const c=document.getElementById('elQR');
+    c.innerHTML=`<img src="${it.qrData}" style="width:100%;height:100%;object-fit:contain;">`;
+    document.getElementById('qrThumb').src=it.qrData;
+    document.getElementById('qrThumb').style.display='block';
+    const btnClear = document.getElementById('btnClearQR');
+    if(btnClear){ btnClear.style.display='flex'; }
+  } else {
+    clearQR();
+  }
+}
+function delBatch(i){batch.splice(i,1);renderBatch();}
+function clearBatch(){batch=[];renderBatch();}
+async function batchAll(){
+  if(!batch.length)return;
+  const p=document.getElementById('bprog'),f=document.getElementById('bfill');p.style.display='block';
+  for(let i=0;i<batch.length;i++){
+    f.style.width=Math.round(i/batch.length*100)+'%';
+    loadBatch(i);await new Promise(r=>setTimeout(r,400));
+  }
+  f.style.width='100%';toast(`✅ ${batch.length} générés`);
+  setTimeout(()=>{p.style.display='none';f.style.width='0%';},2000);
+}
+
+// ═══════ EXPORT ═══════
+async function doExportPDF(){
+  if(location.protocol==='file:'){
+    toast('❌ Export impossible en mode file://. Lance "serve.bat" puis ouvre http://localhost:8000/template-preview.html','err');
+    return;
+  }
+  toast('⏳ PDF en cours…','warn');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    deselectAll();
+    // Cloner l'affiche hors écran pour rendre sans les transforms/zoom actifs
+    const cv = await renderPosterAsCanvas();
+    const imgData = cv.toDataURL('image/png',1);
+    const {jsPDF}=window.jspdf;
+    const fmt=document.getElementById('eFmt').value;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:fmt==='A4'?'a4':'a5'});
+    pdf.addImage(imgData,'PNG',0,0,fmt==='A4'?210:148,fmt==='A4'?297:210,undefined,'FAST');
+    pdf.save(`Moov_QR_${(document.getElementById('iName').value||'affiche').replace(/\s+/g,'_')}_${fmt}.pdf`);
+    toast('✅ PDF exporté !');
+  }catch(err){
+    console.error(err);
+    const msg = err.message||err.toString();
+    if(msg.includes('secure')){
+      toast('❌ Opération bloquée (canvas sécurisée). Servez la page via HTTP/HTTPS ou utilisez un serveur local.','err');
+    } else if (typeof html2canvas==='undefined' || !window.jspdf) {
+      toast('❌ Librairies d’export non chargées. Vérifie ta connexion internet (cette démo charge html2canvas et jsPDF depuis le CDN).','err');
+    } else {
+      toast('❌ '+msg,'err');
+    }
+  }
+}
+async function doExportPNG(){
+  if(location.protocol==='file:'){
+    toast('❌ Export impossible en mode file://. Lance "serve.bat" puis ouvre http://localhost:8000/template-preview.html','err');
+    return;
+  }
+  toast('⏳ PNG en cours…','warn');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    deselectAll();
+    const cv = await renderPosterAsCanvas();
+    const blob = await new Promise((res,rej)=>{
+      cv.toBlob(b=>{ if(b)res(b); else rej(new Error('Impossible de créer le blob')); },'image/png',1);
+    });
+    const a=document.createElement('a');
+    a.download=`Moov_QR_${(document.getElementById('iName').value||'affiche').replace(/\s+/g,'_')}_300dpi.png`;
+    const url=URL.createObjectURL(blob);
+    a.href=url;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ PNG 300 DPI !');
+  }catch(err){
+    console.error(err);
+    const msg = err.message||err.toString();
+    if(msg.includes('secure')){
+      toast('❌ Opération bloquée (canvas sécurisée). Servez la page via HTTP/HTTPS ou utilisez un serveur local.','err');
+    } else if (typeof html2canvas==='undefined') {
+      toast('❌ Librairie d’export (html2canvas) non chargée. Vérifie ta connexion internet (cette démo la charge depuis le CDN).','err');
+    } else {
+      toast('❌ '+msg,'err');
+    }
+  }
+}
+
+// export batch - génère un PDF multi-pages contenant chaque affiche du CSV importé
+async function batchExportPDF(){
+  if(!batch.length){ toast('⚠️ Pas de marchands en batch','warn'); return; }
+  if(location.protocol==='file:'){
+    toast('❌ Export impossible en mode file://. Lance "serve.bat" puis ouvre http://localhost:8000/template-preview.html','err');
+    return;
+  }
+  toast('⏳ Création PDF multi-pages…','warn');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    deselectAll();
+    const {jsPDF}=window.jspdf;
+    const fmt=document.getElementById('eFmt').value;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:fmt==='A4'?'a4':'a5'});
+    const p=document.getElementById('bprog'),f=document.getElementById('bfill');
+    if(p){p.style.display='block'; f.style.width='0%';}
+    for(let i=0;i<batch.length;i++){
+      loadBatch(i);
+      // attendre que les changements (nom, code, QR) se reflètent dans le DOM
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const cv=await renderPosterAsCanvas();
+      const imgData=cv.toDataURL('image/png',1);
+      if(i>0) pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,0,fmt==='A4'?210:148,fmt==='A4'?297:210,'FAST');
+      if(f) f.style.width=Math.round((i+1)/batch.length*100)+'%';
+    }
+    pdf.save(`Batch_Marchands_${batch.length}.pdf`);
+    toast('✅ PDF batch exporté !');
+    if(p){setTimeout(()=>{p.style.display='none';f.style.width='0%';},1500);}
+  }catch(err){
+    console.error(err);
+    toast('❌ '+(err.message||err));
+  }
+}
+async function renderPosterAsCanvas(){
+  const poster = document.getElementById('poster');
+  // on travaille sur un CLONE hors écran pour ne plus toucher à l’UI visible
+  const clone = poster.cloneNode(true);
+  // nettoyer les états de sélection éventuels
+  clone.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));
+
+  // wrapper hors écran
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.background = '#EC6608';
+  wrapper.style.padding = '0';
+  wrapper.style.margin = '0';
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  // attendre un frame pour laisser le layout s’appliquer
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+
+  const cv = await html2canvas(clone,{
+    scale:3,
+    useCORS:true,
+    allowTaint:true,
+    backgroundColor:'#EC6608',
+    logging:false
+  });
+
+  document.body.removeChild(wrapper);
+  return cv;
+}
+function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+
+// ═══════ UTILS ═══════
+function rgb2hex(rgb){
+  if(!rgb||rgb==='transparent')return'#000000';
+  if(rgb.startsWith('#'))return rgb;
+  const m=rgb.match(/\d+/g);if(!m||m.length<3)return'#000000';
+  return'#'+[m[0],m[1],m[2]].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
+}
+function toast(msg,type='ok'){
+  const el=document.getElementById('toastEl');
+  document.getElementById('toastMsg').textContent=msg;
+  el.className='toast show '+(type==='warn'?'twn':type==='err'?'ter':'tok');
+  setTimeout(()=>el.classList.remove('show'),3200);
+}
+function setLang(l){
+  document.getElementById('bFR').classList.toggle('on',l==='fr');
+  document.getElementById('bEN').classList.toggle('on',l==='en');
+}
+
+// ═══════ KEYBOARD ═══════
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.ctrlKey&&e.key==='p'){e.preventDefault();window.print();}
+  if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doExportPDF();}
+  if(e.ctrlKey&&(e.key==='='||e.key==='+')){e.preventDefault();doZoom(0.1);}
+  if(e.ctrlKey&&e.key==='-'){e.preventDefault();doZoom(-0.1);}
+  if(e.ctrlKey&&e.key==='0'){e.preventDefault();zoomFit();}
+  if(!selEl)return;
+  const s=e.shiftKey?10:2;
+  if(e.key==='ArrowLeft'){e.preventDefault();selEl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)-s)+'px';}
+  if(e.key==='ArrowRight'){e.preventDefault();selEl.style.marginLeft=(parseFloat(selEl.style.marginLeft||0)+s)+'px';}
+  if(e.key==='ArrowUp'){e.preventDefault();selEl.style.marginTop=(parseFloat(selEl.style.marginTop||0)-s)+'px';}
+  if(e.key==='ArrowDown'){e.preventDefault();selEl.style.marginTop=(parseFloat(selEl.style.marginTop||0)+s)+'px';}
+  if(e.key==='Escape')deselectAll();
+  if(e.key==='Delete')hideEl();
+});
+
+// Clic hors élément = désélection
+document.getElementById('poster').addEventListener('click',e=>{
+  if(e.target===document.getElementById('poster')||
+     e.target===document.getElementById('pCard')||
+     e.target===document.getElementById('zoneTop')||
+     e.target===document.getElementById('p-bot'))
+    deselectAll();
+});
+
+// ═══════ INIT ═══════
+window.addEventListener('DOMContentLoaded',()=>{
+  // avertissement si la page est ouverte avec file://, ce qui entraine fréquemment
+  // des erreurs "The operation is insecure" lors des exports
+  if(location.protocol==='file:'){
+    toast('⚠️ Ouvrez cette page via un serveur local (http://localhost) pour permettre l\'export','warn');
+  }
+  // ajouter crossOrigin à toutes les images (utile lorsque certains assets sont chargés
+  // via CORS) pour éviter de contaminer le canevas
+  document.querySelectorAll('img').forEach(i=>i.setAttribute('crossorigin','anonymous'));
+
+  // état initial vide : l'utilisateur remplit tout manuellement
+  const iName = document.getElementById('iName');
+  const iCode = document.getElementById('iCode');
+  const iQrTxt = document.getElementById('iQrTxt');
+  const nc = document.getElementById('nc');
+  const cc2 = document.getElementById('cc2');
+  const qrThumb = document.getElementById('qrThumb');
+  const qrFile = document.getElementById('qrFile');
+  const btnClear = document.getElementById('btnClearQR');
+  const elName = document.getElementById('elName');
+
+  if(iName) iName.value='';
+  if(iCode) iCode.value='';
+  if(iQrTxt) iQrTxt.value='';
+  if(nc) nc.textContent='0';
+  if(cc2) cc2.textContent='0';
+  if(elName) elName.innerText='NOM DU MARCHAND';
+  buildCodeBoxes('');
+
+  // QR vide
+  qrImported=false;
+  if(qrThumb) qrThumb.style.display='none';
+  if(qrFile) qrFile.value='';
+  const elQR = document.getElementById('elQR');
+  if(elQR) elQR.innerHTML='';
+  if(btnClear) btnClear.style.display='none';
+
+  bindAll();
+  applyZ();
+  setTimeout(()=>{zoomFit();},200);
+
+  console.log('%c🖨️ QR Poster Studio v2.3','color:#EC6608;font-size:16px;font-weight:900;');
+  console.log('%c✅ HTML+CSS — affiche visible, édition directe','color:#22c55e;');
+});
+</script>
 </body>
 </html>
