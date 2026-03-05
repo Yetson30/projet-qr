@@ -62,7 +62,7 @@ try {
     try {
       $rawPath = $req.Url.AbsolutePath
       $rel = [Uri]::UnescapeDataString($rawPath.TrimStart('/'))
-      if ([string]::IsNullOrWhiteSpace($rel)) { $rel = 'template-preview.html' }
+      if ([string]::IsNullOrWhiteSpace($rel)) { $rel = 'index.html' }
 
       # Prevent path traversal
       $combined = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($root, $rel))

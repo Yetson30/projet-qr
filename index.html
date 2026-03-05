@@ -148,7 +148,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 .p-card{
   position:absolute;left:63px;top:175px;
   width:668px;height:820px;
-  background:#fff;border-radius:20px 20px 0 0;
+  background:#fff;border-radius:20px;
   display:flex;flex-direction:column;align-items:center;
   padding:16px 32px 12px;
   overflow:visible;
@@ -192,7 +192,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 }
 .p-qr img,.p-qr canvas{width:100%;height:100%;object-fit:contain;display:block;}
 
-/* ── Drapeaux CEMAC (CSS only, pas d'images pour éviter tout artefact à l'export) ── */
+/* ── Drapeaux CEMAC (CSS only) ── */
 .p-flags{
   display:flex;align-items:stretch;
   gap:0;width:380px;height:42px;margin-bottom:9px;cursor:move;
@@ -202,7 +202,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
   flex:1;display:block;
   overflow:hidden;
 }
-/* Chaque .fi-* dessine le drapeau en pur CSS, pour que l'écran et l'export soient strictement identiques */
+/* Chaque .fi-* dessine le drapeau en pur CSS */
 .fi-ga{
   /* Gabon : bandes horizontales vert / jaune / bleu */
   background:
@@ -269,7 +269,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 .p-gimacpay{
   display:flex;align-items:center;justify-content:center;
   width:277px;height:98px;
-  margin:0 auto 7px auto;
+  margin:-8px auto 7px auto;
   cursor:move;
   overflow:hidden;
   flex-shrink:0;
@@ -505,9 +505,9 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
             <div class="fi fi-td" title="Tchad"></div>
           </div>
 
-          <!-- GIMACPAY — 277×98px (+30%), lettres uniquement -->
+          <!-- GIMACPAY — 277×98px -->
           <div class="p-gimacpay editable" id="elGimacpay" data-label="Logo GIMACPAY" data-type="image">
-            <img src="assets/logo-gimacpay.png" alt="GIMACPAY"
+            <img src="assets/GIMACPAY.png" alt="GIMACPAY"
                  style="width:277px;height:98px;object-fit:contain;display:block;">
           </div>
 
