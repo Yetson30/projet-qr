@@ -32,7 +32,7 @@ function Write-TextResponse($ctx, [int]$statusCode, [string]$text) {
 }
 
 $root = (Resolve-Path -LiteralPath $PSScriptRoot).Path
-$port = 8000
+$port = 8081
 $prefix = "http://localhost:$port/"
 
 $listener = New-Object System.Net.HttpListener
@@ -49,7 +49,7 @@ try {
 }
 
 Write-Host "Serveur local démarré: $prefix"
-Write-Host "Ouvre: ${prefix}template-preview.html"
+Write-Host "Ouvre: ${prefix}index.html"
 Write-Host "Arrêter: Ctrl+C"
 Write-Host ""
 

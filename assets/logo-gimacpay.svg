@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 150">
+  <!-- Texte GIMACPAY en bleu -->
+  <text
+    x="28"
+    y="112"
+    font-family="'Arial Black', Arial, sans-serif"
+    font-weight="900"
+    font-size="90"
+    letter-spacing="1"
+    fill="#1B5FAA">GIMACPAY</text>
+
+  <!-- Coche verte au-dessus du M -->
+  <polyline
+    points="127,20 165,55 240,12"
+    stroke="#2D7A3A"
+    stroke-width="13"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>

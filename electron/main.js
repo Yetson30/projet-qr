@@ -63,7 +63,7 @@ function createMainWindow() {
   if (fs.existsSync(iconPath)) mainWindow.setIcon(iconPath);
 
   // ── Charger l'interface ────────────────────────────────────────────────────
-  const entryFile = path.join(rootDir, 'template-preview.html');
+  const entryFile = path.join(rootDir, 'index.html');
   mainWindow.loadFile(entryFile);
 
   // ── Afficher proprement ────────────────────────────────────────────────────

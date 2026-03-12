@@ -1,0 +1,13 @@
+#Police d'ecriture:
+ Nom du Marchand :Century Gothic,Gras Taille: 24pt
+
+VOS PAIEMENTS MOBILES ACCEPTÉS ICI: Century Gothic,Gras Taille: 12pt
+Nom marchand : Century Gothic,Gras Taille: 28pt
+
+#Espacement:
+espacement Nom du marchand-code marchand 3 mm
+ espacement drapeaux-Giacpay-VOS PAIEMENTS MOBILES ACCEPTÉS ICI 5 mm
+ 
+espacement du QR code a drapeaux-Giacpay-VOS PAIEMENTS MOBILES ACCEPTÉS ICI 2,5 mm
+
+espacement carte blanche cote gauche et droit avec la zone orange 4,75 mm

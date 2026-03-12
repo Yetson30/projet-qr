@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
-  <!-- Tchad : 3 bandes verticales Bleu / Jaune / Rouge -->
-  <rect width="300" height="600" fill="#002664"/>
-  <rect x="300" width="300" height="600" fill="#FECB00"/>
-  <rect x="600" width="300" height="600" fill="#C60C30"/>
+  <defs>
+    <clipPath id="wave">
+      <path d="M0,100 C150,0 300,200 450,100 C600,0 750,200 900,100 L900,500 C750,600 600,400 450,500 C300,600 150,400 0,500 Z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#wave)">
+    <rect width="300" height="600" fill="#002664"/>
+    <rect x="300" width="300" height="600" fill="#FECB00"/>
+    <rect x="600" width="300" height="600" fill="#C60C30"/>
+  </g>
 </svg>
