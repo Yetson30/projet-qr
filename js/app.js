@@ -169,11 +169,16 @@ function replaceImage(e){
   } else {
     const r=new FileReader();
     r.onload=ev=>{
-      const img=selEl.querySelector('img');
-      if(img){img.src=ev.target.result;img.style.display='block';}
-      else selEl.innerHTML=`<img src="${ev.target.result}" style="max-height:100%;max-width:100%;object-fit:contain;">`;
-      toast('🖼️ Image remplacée');
+      try{
+        const img=selEl.querySelector('img');
+        if(img){img.src=ev.target.result;img.style.display='block';}
+        else selEl.innerHTML=`<img src="${ev.target.result}" style="max-height:100%;max-width:100%;object-fit:contain;">`;
+        toast('🖼️ Image remplacée');
+      }catch(err){
+        toast('❌ Erreur lors du remplacement : '+err.message,'err');
+      }
     };
+    r.onerror=()=>toast('❌ Impossible de lire le fichier image','err');
     r.readAsDataURL(f);
   }
 }
@@ -221,8 +226,14 @@ function dropQR(e){
   const f=e.dataTransfer.files[0]; if(f) processQRFile(f);
 }
 function processQRFile(f){
-  if(f.type==='application/pdf') importQRfromPDF(f);
-  else { const r=new FileReader(); r.onload=ev=>setQRImg(ev.target.result); r.readAsDataURL(f); }
+  if(f.type==='application/pdf'){
+    importQRfromPDF(f);
+  } else {
+    const r=new FileReader();
+    r.onload=ev=>setQRImg(ev.target.result);
+    r.onerror=()=>toast('❌ Impossible de lire le fichier QR','err');
+    r.readAsDataURL(f);
+  }
 }
 async function importQRfromPDF(f){
   toast('⏳ Extraction QR du PDF…','warn');
@@ -415,15 +426,32 @@ function importImageEl(){
 
 // ═══════ CSV ═══════
 function openCSV(){document.getElementById('csvMod').classList.add('op');}
-function fileCSV(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>parseCSV(ev.target.result);r.readAsText(f,'UTF-8');}
-function parseCSVModal(){parseCSV(document.getElementById('csvTA').value);document.getElementById('csvMod').classList.remove('op');}
+function fileCSV(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>parseCSV(ev.target.result);
+  r.onerror=()=>toast('❌ Impossible de lire le fichier CSV','err');
+  r.readAsText(f,'UTF-8');
+}
+function parseCSVModal(){
+  try{
+    parseCSV(document.getElementById('csvTA').value);
+    document.getElementById('csvMod').classList.remove('op');
+  }catch(err){
+    toast('❌ Erreur CSV : '+err.message,'err');
+  }
+}
 function parseCSV(txt){
-  const lines=txt.trim().split('\n').filter(l=>l.trim());
-  const items=[];
-  for(const l of lines){const p=l.split(/[,;|\t]/);if(p.length>=2)items.push({name:p[0].trim().replace(/["']/g,'').toUpperCase(),code:p[1].trim().replace(/["']/g,'').toUpperCase(),qrData:null});}
-  if(!items.length){toast('⚠️ Aucune donnée valide','warn');return;}
-  batch=items;renderBatch();toast(`✅ ${items.length} marchand(s) importé(s)`);
-  if(batch.length) batchAll();
+  try{
+    const lines=txt.trim().split('\n').filter(l=>l.trim());
+    const items=[];
+    for(const l of lines){const p=l.split(/[,;|\t]/);if(p.length>=2)items.push({name:p[0].trim().replace(/["']/g,'').toUpperCase(),code:p[1].trim().replace(/["']/g,'').toUpperCase(),qrData:null});}
+    if(!items.length){toast('⚠️ Aucune donnée valide — vérifiez le format (nom,code)','warn');return;}
+    batch=items;renderBatch();toast(`✅ ${items.length} marchand(s) importé(s)`);
+    if(batch.length) batchAll();
+  }catch(err){
+    toast('❌ Erreur lors du parsing CSV : '+err.message,'err');
+  }
 }
 function renderBatch(){
   const bl=document.getElementById('blist');bl.innerHTML='';
