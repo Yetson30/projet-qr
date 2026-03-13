@@ -122,7 +122,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 /* ── Fond blanc derrière logo Moov ── */
 .p-logo-bg{
   position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:157px;height:106px;
+  width:200px;height:106px;
   background:#fff;
   border-radius:0;
 }
@@ -136,11 +136,13 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 
 /* ── URL ── */
 .p-url{
-  font-family:'Century Gothic',Arial,sans-serif;font-size:15px;font-weight:900;
+  font-family:'Century Gothic',Arial,sans-serif;font-size:12px;font-weight:900;
   color:#005CA9;letter-spacing:.5px;
   cursor:move;white-space:nowrap;
   text-shadow:none;
   padding:2px 6px;border-radius:4px;
+  position:relative;z-index:2;
+  margin-top:-4px;
 }
 
 /* ── Carte blanche ── */
@@ -192,22 +194,22 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 
 /* ── QR Container ── */
 .p-qr{
-  width:244px;height:244px;
+  width:290px;height:290px;
   display:flex;align-items:center;justify-content:center;
   background:#fff;overflow:hidden;flex-shrink:1;min-height:0;
-  margin-bottom:9px;cursor:move;
+  margin-bottom:6px;cursor:move;
 }
 .p-qr img,.p-qr canvas{width:100%;height:100%;object-fit:contain;display:block;}
 
 /* ── Drapeaux CEMAC ── */
 .p-flags{
   display:flex;align-items:center;justify-content:center;
-  width:244px;height:42px;
-  margin-bottom:4px;cursor:move;
-  overflow:hidden;flex-shrink:0;
+  width:380px;height:42px;
+  margin-bottom:0px;cursor:move;
+  overflow:visible;flex-shrink:0;
 }
 .p-flags img{
-  width:244px;height:auto;
+  width:380px;height:auto;
   display:block;
   margin-top:-12px;
 }
@@ -215,16 +217,13 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 /* ── GIMACPAY ── */
 .p-gimacpay{
   display:flex;align-items:center;justify-content:center;
-  width:380px;height:110px;
-  margin:4px auto 4px auto;
+  width:460px;height:auto;
+  margin-top:-30px;margin-bottom:-30px;
   cursor:move;
-  overflow:hidden;
   flex-shrink:0;
 }
 .p-gimacpay img{
-  max-width:380px;
-  max-height:110px;
-  width:auto;
+  width:460px;
   height:auto;
   display:block;
 }
@@ -454,14 +453,13 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
             <img src="assets/drapeaux_pays-removebg-preview.png" alt="Drapeaux CEMAC">
           </div>
 
-          <!-- GIMACPAY — 277×98px -->
+          <!-- GIMACPAY -->
           <div class="p-gimacpay editable" id="elGimacpay" data-label="Logo GIMACPAY" data-type="image">
-            <img src="assets/gimacpay_277x98-removebg-preview.png" alt="GIMACPAY"
-                 style="max-width:277px;height:auto;display:block;">
+            <img src="assets/logo-gimacpay.png" alt="GIMACPAY">
           </div>
 
           <!-- VOS PAIEMENTS -->
-          <div class="p-vos editable" id="elVos" data-label="VOS PAIEMENTS" data-type="text" style="font-family:'Century Gothic',Arial,sans-serif;font-weight:bold;font-size:12pt;margin-top:4px;">VOS PAIEMENTS MOBILES ACCEPTÉS ICI</div>
+          <div class="p-vos editable" id="elVos" data-label="VOS PAIEMENTS" data-type="text" style="font-family:'Century Gothic',Arial,sans-serif;font-weight:bold;font-size:16pt;margin-top:0px;">VOS PAIEMENTS MOBILES ACCEPTÉS ICI</div>
 
         </div><!-- /p-card -->
 
