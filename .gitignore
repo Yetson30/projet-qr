@@ -1,0 +1,24 @@
+# ── Dépendances Node ──────────────────────────────
+node_modules/
+
+# ── Build Electron ────────────────────────────────
+electron/dist/
+electron/out/
+
+# ── Exports générés par l'application ─────────────
+exports/
+
+# ── OS & éditeurs ─────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# ── Logs ──────────────────────────────────────────
+*.log
+npm-debug.log*
+
+# ── Variables d'environnement ─────────────────────
+.env
+.env.*
