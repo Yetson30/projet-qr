@@ -1,13 +1,20 @@
 @font-face {
   font-family: 'Century Gothic';
   src: url('../assets/CenturyGothic.ttf') format('truetype');
-  font-weight: normal;
+  font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Century Gothic';
   src: url('../assets/CenturyGothic-Bold.ttf') format('truetype');
-  font-weight: bold;
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Century Gothic';
+  src: url('../assets/CenturyGothic-Bold.ttf') format('truetype');
+  font-weight: 900;
   font-style: normal;
 }

@@ -32,7 +32,7 @@ function Write-TextResponse($ctx, [int]$statusCode, [string]$text) {
 }
 
 $root = (Resolve-Path -LiteralPath $PSScriptRoot).Path
-$port = 8081
+$port = 8080
 $prefix = "http://localhost:$port/"
 
 $listener = New-Object System.Net.HttpListener

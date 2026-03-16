@@ -424,6 +424,155 @@ function importImageEl(){
   inp.click();
 }
 
+// ═══════ ZIP PDF IMPORT ═══════
+function openZIPHelp(){ document.getElementById('zipHelpMod').classList.add('op'); }
+function fileZIP(e){ const f=e.target.files[0]; if(f) processZIPPDFs(f); e.target.value=''; }
+
+async function processZIPPDFs(file){
+  toast('Chargement du ZIP…','warn');
+
+  // Charger JSZip à la demande
+  if(typeof JSZip==='undefined'){
+    try{ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'); }
+    catch(err){ toast('Erreur chargement JSZip : '+err.message,'err'); return; }
+  }
+
+  // Charger pdf.js à la demande
+  if(typeof pdfjsLib==='undefined'){
+    try{
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        s.onload=()=>{ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; res(); };
+        s.onerror=rej; document.head.appendChild(s);
+      });
+    }catch(err){ toast('Erreur chargement pdf.js : '+err.message,'err'); return; }
+  }
+
+  try{
+    const zip=await JSZip.loadAsync(file);
+
+    // ── Indexer tous les PDFs du ZIP (nom de fichier sans dossier, en minuscule comme clé)
+    const pdfMap={}; // clé: "12345.pdf" en minuscule → entry JSZip
+    zip.forEach((path,entry)=>{
+      if(!entry.dir && path.toLowerCase().endsWith('.pdf')
+         && !path.startsWith('__MACOSX') && !path.split('/').pop().startsWith('.')){
+        const fname=path.split('/').pop();
+        pdfMap[fname.toLowerCase()]=entry;
+      }
+    });
+
+    if(!Object.keys(pdfMap).length){ toast('Aucun PDF trouvé dans le ZIP','warn'); return; }
+
+    // ── Chercher un CSV de liste (marchands.csv, liste.csv, ou tout .csv)
+    let csvEntry=null;
+    const csvPriority=['marchands.csv','liste.csv','merchants.csv'];
+    for(const name of csvPriority){
+      zip.forEach((path,entry)=>{ if(!entry.dir && path.split('/').pop().toLowerCase()===name) csvEntry=entry; });
+      if(csvEntry) break;
+    }
+    if(!csvEntry){
+      // Fallback : premier CSV trouvé
+      zip.forEach((path,entry)=>{
+        if(!csvEntry && !entry.dir && path.toLowerCase().endsWith('.csv')
+           && !path.startsWith('__MACOSX') && !path.split('/').pop().startsWith('.')){
+          csvEntry=entry;
+        }
+      });
+    }
+
+    let merchants=[]; // [{name, code, pdfEntry}]
+
+    if(csvEntry){
+      // ── MODE CSV : le CSV définit nom + code, PDFs nommés par code
+      const csvTxt=await csvEntry.async('string');
+      const lines=csvTxt.trim().split('\n').filter(l=>l.trim());
+      // Sauter la ligne d'en-tête si elle contient "nom" ou "name"
+      const startIdx=(lines[0]&&/^(nom|name|marchand)/i.test(lines[0].split(/[,;|]/)[0].trim()))?1:0;
+      for(const line of lines.slice(startIdx)){
+        const parts=line.split(/[,;|]/).map(p=>p.trim().replace(/^["']|["']$/g,''));
+        if(parts.length<2) continue;
+        const name=parts[0].toUpperCase();
+        const code=parts[1].toUpperCase().replace(/[^A-Z0-9]/g,'');
+        if(!name||!code) continue;
+        // Chercher le PDF correspondant au code (ex: 12345.pdf)
+        const pdfEntry=pdfMap[code.toLowerCase()+'.pdf']||null;
+        merchants.push({name, code, pdfEntry});
+      }
+      if(!merchants.length){ toast('CSV vide ou format incorrect','warn'); return; }
+      toast(`CSV trouvé : ${merchants.length} marchand(s) — extraction QR…`,'warn');
+    } else {
+      // ── MODE FALLBACK : pas de CSV, on parse le nom de fichier PDF
+      // Format attendu : "CODE - NOM DU MARCHAND.pdf"
+      const sortedPdfs=Object.keys(pdfMap).sort();
+      for(const fname of sortedPdfs){
+        const stem=fname.replace(/\.pdf$/i,'').trim();
+        let name, code;
+        const sepIdx=stem.indexOf(' - ');
+        if(sepIdx>0){
+          code=stem.slice(0,sepIdx).trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+          name=stem.slice(sepIdx+3).trim().toUpperCase();
+        } else {
+          code=stem.toUpperCase().replace(/[^A-Z0-9]/g,'');
+          name=stem.toUpperCase();
+        }
+        if(code||name) merchants.push({name:name||code, code:code||name, pdfEntry:pdfMap[fname]});
+      }
+      toast(`Pas de CSV — lecture des noms de fichiers (${merchants.length} PDF)…`,'warn');
+    }
+
+    // ── Rendre chaque PDF en image QR
+    const p=document.getElementById('bprog'), f=document.getElementById('bfill');
+    if(p){ p.style.display='block'; f.style.width='0%'; }
+
+    const newBatch=[];
+    let errors=0;
+
+    for(let i=0;i<merchants.length;i++){
+      const {name, code, pdfEntry}=merchants[i];
+      let qrData=null;
+
+      if(pdfEntry){
+        try{
+          const ab=await pdfEntry.async('arraybuffer');
+          const pdf=await pdfjsLib.getDocument({data:new Uint8Array(ab)}).promise;
+          const page=await pdf.getPage(1);
+          const vp=page.getViewport({scale:3});
+          const cv=document.createElement('canvas');
+          cv.width=vp.width; cv.height=vp.height;
+          await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+          qrData=cv.toDataURL('image/png',1);
+        }catch(err){
+          console.warn('Erreur rendu PDF pour',code,err);
+          errors++;
+        }
+      } else {
+        // PDF introuvable dans le ZIP pour ce code
+        errors++;
+        console.warn('PDF introuvable pour le code :',code);
+      }
+
+      newBatch.push({name, code, qrData});
+      if(f) f.style.width=Math.round((i+1)/merchants.length*100)+'%';
+    }
+
+    batch=newBatch;
+    renderBatch();
+
+    const ok=newBatch.filter(x=>x.qrData).length;
+    const missing=newBatch.filter(x=>!x.qrData).length;
+    if(missing) toast(`${ok} QR extraits — ${missing} PDF(s) manquant(s) dans le ZIP`,'warn');
+    else toast(`${ok} affiche(s) prête(s) !`);
+
+    if(p) setTimeout(()=>{ p.style.display='none'; f.style.width='0%'; },1500);
+    if(batch.length) loadBatch(0);
+
+  }catch(err){
+    console.error(err);
+    toast('Erreur ZIP : '+err.message,'err');
+  }
+}
+
 // ═══════ CSV ═══════
 function openCSV(){document.getElementById('csvMod').classList.add('op');}
 function fileCSV(e){
