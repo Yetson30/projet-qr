@@ -327,9 +327,9 @@ function buildCodeBoxes(code){
   const str=(code||'').trim();
   if(!str) return;
   const len=str.length;
-  const w=len>15?28:len>10?36:46;
+  const w=len>15?20:len>10?26:32;
   const h=Math.round(w*1.17);
-  const fs=len>15?15:len>10?20:26;
+  const fs=len>15?11:len>10?14:18;
   for(const c of str){
     const b=document.createElement('div');
     b.className='cbox';

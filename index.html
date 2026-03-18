@@ -183,7 +183,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 /* ── Boîtes code ── */
 .p-codebox-row{
   display:flex;align-items:center;justify-content:center;
-  gap:3px;margin-bottom:12px;flex-wrap:nowrap;
+  gap:2px;margin-bottom:4px;flex-wrap:nowrap;
 }
 .cbox{
   display:flex;align-items:center;justify-content:center;
@@ -195,9 +195,10 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 
 /* ── QR Container ── */
 .p-qr{
-  width:290px;height:290px;
+  width:300px;height:300px;
+  min-width:300px;max-width:300px;
   display:flex;align-items:center;justify-content:center;
-  background:#fff;overflow:hidden;flex-shrink:1;min-height:0;
+  background:#fff;overflow:hidden;flex-shrink:0;
   margin-bottom:6px;cursor:move;
 }
 .p-qr img,.p-qr canvas{width:100%;height:100%;object-fit:contain;display:block;}
@@ -205,17 +206,17 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 /* ── Drapeaux CEMAC ── */
 .p-flags{
   display:flex;align-items:center;justify-content:center;
-  width:265px;height:42px;
+  width:480px;height:43px;
   margin-bottom:0px;cursor:move;
   overflow:visible;flex-shrink:0;
 }
 .p-flags img{
-  width:265px;height:auto;
+  width:299px;height:auto;
   display:block;
   margin-top:-12px;
 }
 
-/* ── GIMACPAY ── */
+/* ── GIMACPAY ── s*/
 .p-gimacpay{
   display:flex;align-items:center;justify-content:center;
   width:460px;height:auto;
@@ -224,7 +225,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
   flex-shrink:0;
 }
 .p-gimacpay img{
-  width:460px;
+  width:400px;
   height:auto;
   display:block;
 }
@@ -253,9 +254,9 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 /* GIMAC — même taille, plus carré */
 #elGimac{width:70px;height:55px;padding:5px 8px;}
 /* maDIGIPRIE — plus petit et carré */
-#elMadigi{width:48px;height:48px;padding:5px;}
+#elMadigi{width:80px;height:55px;padding:2px;overflow:hidden;}
 .p-cap img{max-height:43px;max-width:58px;object-fit:contain;}
-#elMadigi img{max-height:38px;max-width:38px;}
+#elMadigi img{width:76px;height:51px;max-height:none;max-width:none;object-fit:contain;transform:scale(2);transform-origin:center center;}
 .p-cap-txt{font-family:'Century Gothic',Arial,sans-serif;font-size:9px;font-weight:900;color:#005CA9;display:none;}
 
 /* ═══════════════════════════════════════
@@ -427,7 +428,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 
           <!-- Logo Moov Money -->
           <div class="p-logo editable" id="elLogo" data-label="Logo Moov Money" data-type="image">
-            <img src="assets/logoMoov.PNG" alt="Logo Moov Money" style="width: 100%; height: 100%; object-fit: contain;">
+            <img src="assets/LOGO-MOOV-MONEY-.png" alt="Logo Moov Money" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
 
           <!-- URL -->
@@ -465,7 +466,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
 
           <!-- GIMACPAY -->
           <div class="p-gimacpay editable" id="elGimacpay" data-label="Logo GIMACPAY" data-type="image">
-            <img src="assets/logo-gimacpay.png" alt="GIMACPAY">
+            <img src="assets/gimacpay_277x98upscale.png" alt="GIMACPAY">
           </div>
 
           <!-- VOS PAIEMENTS -->
@@ -477,7 +478,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1e;display:flex;flex-directi
         <div class="p-bot">
           <!-- Capsule maDIGIPRIE -->
           <div class="p-cap editable" id="elMadigi" data-label="Logo maDIGIPRIE" data-type="image">
-            <img src="assets/logo-madigi.png" alt="maDIGIPRIE"
+            <img src="assets/madigipaie-removebg-preview.png" alt="maDIGIPAIE"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
             <span class="p-cap-txt">maDIGIPRIE</span>
           </div>
